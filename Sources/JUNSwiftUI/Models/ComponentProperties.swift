@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 /// Type-safe properties for each component type
-enum ComponentProperties: Codable {
+enum ComponentProperties: Codable, Equatable {
     case layout(LayoutProperties)
     case text(TextProperties)
     case image(ImageProperties)
@@ -38,7 +38,7 @@ enum ComponentProperties: Codable {
 
 // MARK: - Layout Properties (VStack, HStack, ZStack)
 
-struct LayoutProperties: Codable {
+struct LayoutProperties: Codable, Equatable {
     let layoutType: LayoutType
     let spacing: CGFloat?
     let alignment: String?
@@ -82,7 +82,7 @@ struct LayoutProperties: Codable {
     }
 }
 
-enum LayoutType {
+enum LayoutType: Equatable {
     case vstack
     case hstack
     case zstack
@@ -90,7 +90,7 @@ enum LayoutType {
 
 // MARK: - Text Properties
 
-struct TextProperties: Codable {
+struct TextProperties: Codable, Equatable {
     let content: String
     let fontSize: CGFloat?
     let fontWeight: String?
@@ -131,7 +131,7 @@ struct TextProperties: Codable {
 
 // MARK: - Image Properties
 
-struct ImageProperties: Codable {
+struct ImageProperties: Codable, Equatable {
     let imageURL: String?
     let resizable: Bool?
     let common: CommonProperties
@@ -167,7 +167,7 @@ struct ImageProperties: Codable {
 
 // MARK: - Button Properties
 
-struct ButtonProperties: Codable {
+struct ButtonProperties: Codable, Equatable {
     let label: String
     let action: String?
     let common: CommonProperties
@@ -208,7 +208,7 @@ struct ButtonProperties: Codable {
 
 // MARK: - Shape Properties
 
-struct ShapeProperties: Codable {
+struct ShapeProperties: Codable, Equatable {
     let shapeType: ShapeType
     let common: CommonProperties
 
@@ -235,14 +235,14 @@ struct ShapeProperties: Codable {
     }
 }
 
-enum ShapeType {
+enum ShapeType: Equatable {
     case rectangle
     case circle
 }
 
 // MARK: - ScrollView Properties
 
-struct ScrollViewProperties: Codable {
+struct ScrollViewProperties: Codable, Equatable {
     let axis: String?
     let showsIndicators: Bool?
     let common: CommonProperties
@@ -280,7 +280,7 @@ struct ScrollViewProperties: Codable {
 
 // MARK: - Common Properties (applicable to all components)
 
-struct CommonProperties: Codable {
+struct CommonProperties: Codable, Equatable {
     let padding: CGFloat?
     let width: CGFloat?
     let height: CGFloat?

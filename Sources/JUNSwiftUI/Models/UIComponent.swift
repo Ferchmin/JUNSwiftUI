@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 /// Represents a UI component that can be decoded from JSON and rendered as SwiftUI
-public struct UIComponent: Codable, Identifiable {
+public struct UIComponent {
     public let id: UUID
     let type: ComponentProperties
     let children: [UIComponent]?
@@ -137,3 +137,12 @@ public struct UIComponent: Codable, Identifiable {
         }
     }
 }
+
+extension UIComponent: Equatable { }
+extension UIComponent: Codable { }
+extension UIComponent: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+extension UIComponent: Identifiable { }

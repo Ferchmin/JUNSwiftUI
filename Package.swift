@@ -2,27 +2,27 @@
 import PackageDescription
 
 let package = Package(
-    name: "JSONToSwiftUI",
+    name: "JUNSwiftUI",
     platforms: [
         .iOS(.v17),
         .macOS(.v14)
     ],
     products: [
         .library(
-            name: "JSONToSwiftUI",
-            targets: ["JSONToSwiftUI"]
+            name: "JUNSwiftUI",
+            targets: ["JUNSwiftUI"]
         )
     ],
     targets: [
         .target(
-            name: "JSONToSwiftUI",
+            name: "JUNSwiftUI",
             dependencies: [],
-            path: "Sources/JSONToSwiftUI"
+            path: "Sources/JUNSwiftUI"
         ),
         .testTarget(
-            name: "JSONToSwiftUITests",
-            dependencies: ["JSONToSwiftUI"],
-            path: "Tests/JSONToSwiftUITests"
+            name: "JUNSwiftUITests",
+            dependencies: ["JUNSwiftUI"],
+            path: "Tests/JUNSwiftUITests"
         )
     ]
 )

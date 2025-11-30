@@ -1,307 +1,100 @@
-# JSONToSwiftUI
+# JUNSwiftUI
 
-A Swift Package for rendering SwiftUI views dynamically from JSON definitions. This demonstrates a generative UI approach similar to Flutter's GenUI SDK.
+SwiftUI implementation of the [JUN (JSON UI Notation)](https://github.com/yourusername/JUN) specification.
 
-**Requirements**: iOS 17+ / macOS 14+ (uses Swift 5.9 with Observable macro)
+**Platform**: iOS 17+ / macOS 14+
+**Language**: Swift 5.9+
+**License**: MIT
+
+---
 
 ## Overview
 
-This POC allows you to define user interfaces in JSON format and render them as native SwiftUI views at runtime. It's useful for:
-
-- **Server-driven UI**: Update UI layouts without app updates
-- **A/B Testing**: Test different layouts dynamically
-- **LLM-Generated UI**: Let AI models design interfaces using structured output
-- **Rapid Prototyping**: Design UIs in JSON for quick iteration
+JUNSwiftUI is a Swift Package that renders [JUN](https://github.com/yourusername/JUN) JSON definitions as native SwiftUI views. It provides a type-safe, performant implementation using Swift's Codable and SwiftUI's declarative syntax.
 
 ## Features
 
-### Supported Components
-
-- **Layout Components**:
-  - `vstack` - Vertical stack with spacing and alignment
-  - `hstack` - Horizontal stack with spacing and alignment
-  - `zstack` - Depth stack with alignment
-  - `scrollView` - Scrollable container (vertical or horizontal)
-
-- **Content Components**:
-  - `text` - Text with font size, weight, and color
-  - `image` - SF Symbols or async images from URLs
-  - `button` - Interactive button with actions
-
-- **Shape Components**:
-  - `rectangle` - Rectangular shape
-  - `circle` - Circular shape
-  - `divider` - Horizontal/vertical divider
-  - `spacer` - Flexible space
-
-### Supported Properties
-
-#### Layout Properties
-- `spacing` - Space between children (CGFloat)
-- `alignment` - Alignment of children (leading, center, trailing, top, bottom)
-- `padding` - Internal padding (CGFloat)
-
-#### Text Properties
-- `content` - Text content (String)
-- `fontSize` - Font size (CGFloat)
-- `fontWeight` - Font weight (thin, light, regular, medium, semibold, bold, heavy, black)
-- `foregroundColor` - Text/icon color
-
-#### Image Properties
-- `imageName` - SF Symbol name (String)
-- `imageURL` - Remote image URL (String)
-- `imageWidth`, `imageHeight` - Image dimensions (CGFloat)
-- `resizable` - Whether image is resizable (Bool)
-- `aspectRatio` - Aspect ratio mode (fit, fill)
-
-#### Frame Properties
-- `width`, `height` - Fixed dimensions (CGFloat)
-- `maxWidth`, `maxHeight` - Maximum dimensions (CGFloat)
-
-#### Visual Properties
-- `backgroundColor` - Background color
-- `cornerRadius` - Corner radius (CGFloat)
-
-#### ScrollView Properties
-- `scrollAxis` - Scroll direction (vertical, horizontal)
-- `showsIndicators` - Show scroll indicators (Bool)
-
-### Color Support
-
-Colors can be specified as:
-- **Named colors**: "red", "blue", "green", "yellow", "orange", "purple", "pink", "gray", "black", "white", "primary", "secondary"
-- **Hex colors**: "#FF5733", "#00FF00AA" (with optional alpha)
-
-## JSON Schema
-
-### Basic Structure
-
-```json
-{
-  "type": "component_type",
-  "properties": {
-    "property1": "value1",
-    "property2": 123
-  },
-  "children": [
-    { ... nested components ... }
-  ]
-}
-```
-
-### Example: Simple Layout
-
-```json
-{
-  "type": "vstack",
-  "properties": {
-    "spacing": 20,
-    "alignment": "center",
-    "padding": 16
-  },
-  "children": [
-    {
-      "type": "text",
-      "properties": {
-        "content": "Hello, World!",
-        "fontSize": 28,
-        "fontWeight": "bold",
-        "foregroundColor": "blue"
-      }
-    },
-    {
-      "type": "button",
-      "properties": {
-        "buttonLabel": "Get Started",
-        "backgroundColor": "blue",
-        "foregroundColor": "white",
-        "padding": 15,
-        "cornerRadius": 10
-      }
-    }
-  ]
-}
-```
-
-### Example: Complex Layout with Images
-
-```json
-{
-  "type": "hstack",
-  "properties": {
-    "spacing": 12,
-    "padding": 12,
-    "backgroundColor": "#F5F5F5",
-    "cornerRadius": 12
-  },
-  "children": [
-    {
-      "type": "image",
-      "properties": {
-        "imageName": "star.fill",
-        "foregroundColor": "yellow",
-        "imageWidth": 40,
-        "imageHeight": 40
-      }
-    },
-    {
-      "type": "vstack",
-      "properties": {
-        "spacing": 4,
-        "alignment": "leading"
-      },
-      "children": [
-        {
-          "type": "text",
-          "properties": {
-            "content": "Featured Item",
-            "fontSize": 18,
-            "fontWeight": "semibold"
-          }
-        },
-        {
-          "type": "text",
-          "properties": {
-            "content": "Special offer",
-            "fontSize": 14,
-            "foregroundColor": "gray"
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Example: Horizontal ScrollView
-
-```json
-{
-  "type": "scrollView",
-  "properties": {
-    "scrollAxis": "horizontal",
-    "showsIndicators": false
-  },
-  "children": [
-    {
-      "type": "hstack",
-      "properties": {
-        "spacing": 12
-      },
-      "children": [
-        {
-          "type": "rectangle",
-          "properties": {
-            "width": 150,
-            "height": 200,
-            "backgroundColor": "red",
-            "cornerRadius": 12
-          }
-        },
-        {
-          "type": "rectangle",
-          "properties": {
-            "width": 150,
-            "height": 200,
-            "backgroundColor": "blue",
-            "cornerRadius": 12
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Project Structure
-
-```
-JSONToSwiftUI/
-├── Sources/
-│   └── JSONToSwiftUI/              # Swift Package source code
-│       ├── Models/
-│       │   ├── UIComponent.swift          # Component model
-│       │   └── ComponentProperties.swift  # Component properties
-│       ├── Views/
-│       │   ├── ComponentRenderer.swift    # SwiftUI renderer
-│       │   └── JSONToSwiftUIViewModel.swift
-│       └── Utilities/
-│           └── JSONLoader.swift           # JSON loading utilities
-├── Tests/
-│   └── JSONToSwiftUITests/         # Unit tests
-├── Example/
-│   └── JSONToSwiftUIApp/           # Example iOS app
-│       ├── JSONToSwiftUIApp.xcodeproj
-│       └── JSONToSwiftUIApp/
-│           ├── ContentView.swift          # Example app UI
-│           ├── JSONToSwiftUIAppApp.swift
-│           └── Resources/
-│               └── SampleJSON/            # Sample JSON files
-│                   ├── simple-layout.json
-│                   ├── complex-layout.json
-│                   └── horizontal-scroll.json
-├── Package.swift
-├── README.md
-└── .gitignore
-```
+- ✅ Full JUN v1.0 specification compliance
+- ✅ Native SwiftUI rendering with @ViewBuilder
+- ✅ AsyncImage for remote URLs with loading states
+- ✅ Type-safe JSON parsing with Codable
+- ✅ Zero external dependencies
+- ✅ Comprehensive error handling
+- ✅ Example app with live samples
 
 ## Installation
 
 ### Swift Package Manager
 
-Add this package to your project:
+Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/JSONToSwiftUI.git", from: "1.0.0")
+    .package(url: "https://github.com/yourusername/JUNSwiftUI.git", from: "1.0.0")
 ]
 ```
 
 Or in Xcode:
 1. File → Add Package Dependencies
-2. Enter the repository URL
-3. Select the version
+2. Enter: `https://github.com/yourusername/JUNSwiftUI`
+3. Select version and add to target
 
-## Running the Example App
+## Quick Start
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/JSONToSwiftUI.git
-   cd JSONToSwiftUI
-   ```
+```swift
+import JUNSwiftUI
 
-2. Open the example app:
-   ```bash
-   cd Example/JSONToSwiftUIApp
-   open JSONToSwiftUIApp.xcodeproj
-   ```
-
-3. Select a simulator or device from the target menu
-4. Press ⌘R to build and run
-
-The example app includes sample JSON layouts demonstrating the library's capabilities.
+struct ContentView: View {
+    var body: some View {
+        // Load from JSON string
+        if let component = try? JSONLoader.loadFromString("""
+        {
+          "type": "vstack",
+          "properties": {
+            "spacing": 20,
+            "padding": 16
+          },
+          "children": [
+            {
+              "type": "text",
+              "properties": {
+                "content": "Hello, JUN!",
+                "fontSize": 28,
+                "fontWeight": "bold"
+              }
+            }
+          ]
+        }
+        """) {
+            ComponentRenderer(component: component)
+        }
+    }
+}
+```
 
 ## Usage
 
-### In the App
+### Loading JSON
 
-1. **Browse Samples**: The app loads with sample JSON layouts
-2. **Select a Sample**: Tap a sample to render it
-3. **Paste Custom JSON**: Tap the menu (•••) and select "Paste JSON" to render your own
-4. **Clear**: Return to sample selection
+**From String:**
+```swift
+let component = try JSONLoader.loadFromString(jsonString)
+```
 
-### Programmatic Usage
+**From URL:**
+```swift
+let url = URL(string: "https://api.example.com/ui/home")!
+let component = try JSONLoader.loadFromURL(url)
+```
+
+**From Bundle:**
+```swift
+let component = try JSONLoader.loadFromBundle(filename: "layout")
+```
+
+### Rendering
 
 ```swift
-import JSONToSwiftUI
-
-// Load from JSON string
-let component = try JSONLoader.loadFromString(jsonString)
-
-// Load from file
-let component = try JSONLoader.loadFromURL(fileURL)
-
-// Render in SwiftUI
 struct MyView: View {
     let component: UIComponent
 
@@ -311,169 +104,189 @@ struct MyView: View {
 }
 ```
 
-## Architecture
-
-### Component Model (`UIComponent`)
-
-Codable struct representing a UI component with:
-- `type`: Component type (enum)
-- `properties`: Dictionary of component properties
-- `children`: Optional array of child components (recursive)
-
-### Renderer (`ComponentRenderer`)
-
-SwiftUI view that:
-1. Recursively traverses the component tree
-2. Builds native SwiftUI views based on component types
-3. Applies properties as view modifiers
-
-### View Modifiers
-
-Extension on `View` that applies common modifiers:
-- Frame (width, height, maxWidth, maxHeight)
-- Padding
-- Colors (foreground, background)
-- Corner radius
-- Image-specific modifiers
-
-## Extending the POC
-
-### Adding New Component Types
-
-1. Add case to `ComponentType` enum in `UIComponent.swift`:
-   ```swift
-   enum ComponentType: String, Codable {
-       // ... existing cases
-       case customComponent
-   }
-   ```
-
-2. Add properties to `ComponentProperties` struct if needed
-
-3. Implement renderer in `ComponentRenderer.swift`:
-   ```swift
-   case .customComponent:
-       buildCustomComponent(component)
-   ```
-
-4. Create builder method:
-   ```swift
-   @ViewBuilder
-   private func buildCustomComponent(_ component: UIComponent) -> some View {
-       // Your SwiftUI view implementation
-   }
-   ```
-
-### Adding New Properties
-
-1. Add property to `ComponentProperties`:
-   ```swift
-   var myNewProperty: String?
-   ```
-
-2. Use in renderer or create new modifier
-
-## LLM Integration Example
-
-This POC is designed to work with LLM-generated JSON. Here's how to use it with an LLM:
-
-### Prompt Template
-
-```
-Generate a JSON representation of a UI layout for [description].
-
-Use the following component types:
-- vstack, hstack, zstack (spacing, alignment, padding)
-- scrollView (scrollAxis: "horizontal" or "vertical")
-- text (content, fontSize, fontWeight, foregroundColor)
-- image (imageName for SF Symbols, imageURL for remote images)
-- button (buttonLabel, backgroundColor, foregroundColor)
-- rectangle, circle (width, height, backgroundColor, cornerRadius)
-- spacer, divider
-
-Output only valid JSON matching this schema:
-{
-  "type": "component_type",
-  "properties": { ... },
-  "children": [ ... ]
-}
-```
-
-### Using with Apple's FoundationModels
+### Error Handling
 
 ```swift
-import FoundationModels
-
-@Generable
-struct GeneratedUI {
-    var component: UIComponent
+do {
+    let component = try JSONLoader.loadFromString(jsonString)
+    ComponentRenderer(component: component)
+} catch {
+    Text("Failed to load UI: \(error.localizedDescription)")
 }
-
-let model = LanguageModel.anthropic.claude
-let result = try await model.generate(
-    prompt: "Create a login form with username and password fields",
-    guidedBy: GeneratedUI.self
-)
-
-// Render the generated component
-ComponentRenderer(component: result.component)
 ```
 
-## Comparison to Flutter GenUI
+## Implementation Details
 
-| Feature | Flutter GenUI | This POC |
-|---------|---------------|----------|
-| **Component Catalog** | Dart widget schemas | Swift Codable types |
-| **Schema Definition** | json_schema_builder | Swift type system |
-| **Data Binding** | Path-based reactive binding | SwiftUI @State/@Binding |
-| **Rendering** | Flutter widget tree | SwiftUI view hierarchy |
-| **LLM Integration** | Firebase AI / Gemini | Compatible with any LLM |
+### Component Mapping
 
-## Sample JSON Files
+JUN components map to SwiftUI views:
 
-Three sample JSON files are included:
+| JUN Type | SwiftUI View |
+|----------|--------------|
+| `vstack` | `VStack` |
+| `hstack` | `HStack` |
+| `zstack` | `ZStack` |
+| `scrollView` | `ScrollView` |
+| `text` | `Text` |
+| `image` | `AsyncImage` |
+| `button` | `Button` |
+| `rectangle` | `Rectangle` |
+| `circle` | `Circle` |
+| `spacer` | `Spacer` |
+| `divider` | `Divider` |
 
-1. **simple-layout.json** - Basic components showcase
-2. **complex-layout.json** - Product list with nested layouts
-3. **horizontal-scroll.json** - Horizontal scrolling gallery
+### Property Mapping
 
-## Limitations
+Universal properties apply SwiftUI modifiers:
 
-This is a proof-of-concept with the following limitations:
+| JUN Property | SwiftUI Modifier |
+|--------------|------------------|
+| `padding` | `.padding(_)` |
+| `width`, `height` | `.frame(width:height:)` |
+| `maxWidth`, `maxHeight` | `.frame(maxWidth:maxHeight:)` |
+| `foregroundColor` | `.foregroundColor(_)` |
+| `backgroundColor` | `.background(_)` |
+| `cornerRadius` | `.cornerRadius(_)` |
+| `clipped` | `.clipped()` |
+| `aspectRatio` | `.aspectRatio(_:contentMode:)` |
+| `contentMode` | ContentMode parameter |
 
-- ⚠️ No runtime validation of JSON schema
-- ⚠️ Button actions are print statements only
-- ⚠️ No support for animations or gestures
-- ⚠️ Limited error handling for malformed JSON
-- ⚠️ No state management between renders
-- ⚠️ AsyncImage requires internet for remote URLs
+### ScrollView Clipping
 
-## Future Enhancements
+The `clipped` property has special behavior on ScrollView:
+- `clipped: true` or omitted → Default clipping
+- `clipped: false` → Applies `.scrollClipDisabled(true)`
 
-Potential improvements:
+### Image Loading
 
-- [ ] Add more SwiftUI components (List, Form, Picker, etc.)
-- [ ] Support for navigation and routing
-- [ ] State management and data binding
-- [ ] Action handlers with callback system
-- [ ] Animation support
-- [ ] Gesture recognizers
-- [ ] Custom component registration
-- [ ] JSON schema validation
-- [ ] Real-time JSON editing with live preview
-- [ ] Export SwiftUI code from JSON
+Images use SwiftUI's `AsyncImage`:
+- **Loading state**: Shows `ProgressView()`
+- **Success state**: Displays image with applied modifiers
+- **Failure state**: Shows placeholder icon
+- **Resizable**: Applies `.resizable()` when `resizable: true`
 
-## Related Technologies
+### Color Parsing
 
-- **Flutter GenUI**: https://pub.dev/packages/genui
-- **Apple FoundationModels**: Swift framework for LLM structured output
-- **LLM.swift**: https://github.com/eastriverlee/LLM.swift
-- **Vercel AI SDK**: https://ai-sdk.dev/docs/ai-sdk-ui/generative-user-interfaces
+Supports:
+- **Named colors**: Maps to SwiftUI `Color` constants
+- **Hex colors**: Custom parser for `#RRGGBB` and `#RRGGBBAA` formats
+
+## Project Structure
+
+```
+JUNSwiftUI/
+├── Sources/
+│   └── JUNSwiftUI/
+│       ├── Models/
+│       │   ├── UIComponent.swift          # Component model
+│       │   ├── ComponentProperties.swift  # Property definitions
+│       │   └── RootDocument.swift         # Data binding (future)
+│       ├── Views/
+│       │   ├── ComponentRenderer.swift    # Main renderer
+│       │   └── JSONToSwiftUIViewModel.swift
+│       └── Utilities/
+│           └── JSONLoader.swift           # JSON loading
+├── Tests/
+│   └── JUNSwiftUITests/
+├── Example/
+│   └── JUNSwiftUIApp/                     # Example iOS app
+└── Package.swift
+```
+
+## Running the Example App
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/JUNSwiftUI.git
+   cd JUNSwiftUI
+   ```
+
+2. Open the example app:
+   ```bash
+   cd Example/JUNSwiftUIApp
+   open JUNSwiftUIApp.xcodeproj
+   ```
+
+3. Build and run (⌘R)
+
+The example app includes:
+- Interactive sample browser
+- Live rendering of JUN definitions
+- JSON paste feature for testing
+- Multiple example layouts
+
+## API Reference
+
+### JSONLoader
+
+```swift
+// Load component
+static func loadFromURL(_ url: URL) throws -> UIComponent
+static func loadFromString(_ jsonString: String) throws -> UIComponent
+static func loadFromBundle(filename: String, bundle: Bundle = .main) throws -> UIComponent
+static func loadFromData(_ data: Data) throws -> UIComponent
+```
+
+### ComponentRenderer
+
+```swift
+public struct ComponentRenderer: View {
+    public init(component: UIComponent)
+    public var body: some View
+}
+```
+
+### Error Types
+
+```swift
+public enum JSONLoaderError: LocalizedError {
+    case fileNotFound(String)
+    case invalidString
+    case decodingFailed(Error)
+}
+```
+
+## Requirements
+
+- iOS 17.0+ or macOS 14.0+
+- Swift 5.9+
+- Xcode 15.0+
+
+## Specification
+
+This implementation follows the [JUN v1.0 Specification](https://github.com/yourusername/JUN/blob/main/spec/jun-spec.md).
+
+For complete format documentation, see the [JUN repository](https://github.com/yourusername/JUN).
+
+## Known Limitations
+
+- Button actions only print to console (no custom handlers yet)
+- No navigation support (planned for v1.1)
+- No data binding or template variables (planned for v1.1)
+- No form input components (TextField, Picker, etc.)
+
+## Contributing
+
+Contributions welcome! Please ensure:
+- Code follows Swift style guidelines
+- Changes maintain JUN spec compliance
+- Tests pass
+- Example app works
+
+## Related Projects
+
+- **[JUN Specification](https://github.com/yourusername/JUN)** - Main specification repo
+- **JUNReact** - React implementation (coming soon)
+- **JUNAndroid** - Android/Compose implementation (coming soon)
 
 ## License
 
-This is a proof-of-concept for demonstration purposes.
+MIT License - See [LICENSE](LICENSE)
 
 ## Author
 
-Created as a POC for exploring generative UI patterns in SwiftUI.
+Pawel Zgoda-Ferchmin
+
+---
+
+Part of the **JUN** ecosystem - [JUN Specification](https://github.com/yourusername/JUN)

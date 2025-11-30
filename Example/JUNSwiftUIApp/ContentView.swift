@@ -1,22 +1,12 @@
 //
 //  ContentView.swift
-//  JSONToSwiftUIApp
+//  JUNSwiftUIApp
 //
 //  Created by Pawel Zgoda-Ferchmin on 28/11/2025.
 //
 
 import SwiftUI
-import JSONToSwiftUI
-
-extension UIComponent: Hashable {
-    public static func == (lhs: UIComponent, rhs: UIComponent) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
+import JUNSwiftUI
 
 struct ContentView: View {
     @State private var errorMessage: String?
