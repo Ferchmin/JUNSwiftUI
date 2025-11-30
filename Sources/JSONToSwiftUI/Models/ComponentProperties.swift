@@ -132,56 +132,36 @@ struct TextProperties: Codable {
 // MARK: - Image Properties
 
 struct ImageProperties: Codable {
-    let imageName: String?
     let imageURL: String?
-    let imageWidth: CGFloat?
-    let imageHeight: CGFloat?
     let resizable: Bool?
-    let aspectRatio: String?
     let common: CommonProperties
 
     init(
-        imageName: String? = nil,
         imageURL: String? = nil,
-        imageWidth: CGFloat? = nil,
-        imageHeight: CGFloat? = nil,
         resizable: Bool? = nil,
-        aspectRatio: String? = nil,
         common: CommonProperties = CommonProperties()
     ) {
-        self.imageName = imageName
         self.imageURL = imageURL
-        self.imageWidth = imageWidth
-        self.imageHeight = imageHeight
         self.resizable = resizable
-        self.aspectRatio = aspectRatio
         self.common = common
     }
 
     init(from decoder: Decoder) throws {
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
-        self.imageName = try? container.decode(String.self, forKey: .imageName)
         self.imageURL = try? container.decode(String.self, forKey: .imageURL)
-        self.imageWidth = try? container.decode(CGFloat.self, forKey: .imageWidth)
-        self.imageHeight = try? container.decode(CGFloat.self, forKey: .imageHeight)
         self.resizable = try? container.decode(Bool.self, forKey: .resizable)
-        self.aspectRatio = try? container.decode(String.self, forKey: .aspectRatio)
         self.common = try CommonProperties(from: decoder)
     }
 
     func encode(to encoder: Encoder) throws {
         var container: KeyedEncodingContainer<CodingKeys> = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(imageName, forKey: .imageName)
         try container.encodeIfPresent(imageURL, forKey: .imageURL)
-        try container.encodeIfPresent(imageWidth, forKey: .imageWidth)
-        try container.encodeIfPresent(imageHeight, forKey: .imageHeight)
         try container.encodeIfPresent(resizable, forKey: .resizable)
-        try container.encodeIfPresent(aspectRatio, forKey: .aspectRatio)
         try common.encode(to: encoder)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case imageName, imageURL, imageWidth, imageHeight, resizable, aspectRatio
+        case imageURL, resizable
     }
 }
 
@@ -309,6 +289,9 @@ struct CommonProperties: Codable {
     let foregroundColor: String?
     let backgroundColor: String?
     let cornerRadius: CGFloat?
+    let clipped: Bool?
+    let aspectRatio: CGFloat?
+    let contentMode: String?
 
     init(
         padding: CGFloat? = nil,
@@ -318,7 +301,10 @@ struct CommonProperties: Codable {
         maxHeight: CGFloat? = nil,
         foregroundColor: String? = nil,
         backgroundColor: String? = nil,
-        cornerRadius: CGFloat? = nil
+        cornerRadius: CGFloat? = nil,
+        clipped: Bool? = nil,
+        aspectRatio: CGFloat? = nil,
+        contentMode: String? = nil
     ) {
         self.padding = padding
         self.width = width
@@ -328,6 +314,9 @@ struct CommonProperties: Codable {
         self.foregroundColor = foregroundColor
         self.backgroundColor = backgroundColor
         self.cornerRadius = cornerRadius
+        self.clipped = clipped
+        self.aspectRatio = aspectRatio
+        self.contentMode = contentMode
     }
 }
 

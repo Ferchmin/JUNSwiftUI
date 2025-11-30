@@ -26,7 +26,8 @@
       "type": "scrollView",
       "properties": {
         "scrollAxis": "horizontal",
-        "showsIndicators": false
+        "showsIndicators": false,
+        "clipped": false,
       },
       "children": [
         {
@@ -42,28 +43,16 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "properties": {
-                        "width": 200,
-                        "height": 150,
-                        "backgroundColor": "red",
-                        "cornerRadius": 12
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "photo",
-                        "foregroundColor": "white",
-                        "imageWidth": 50,
-                        "imageHeight": 50
-                      }
-                    }
-                  ]
+                  "type": "image",
+                  "properties": {
+                    "imageURL": "https://picsum.photos/seed/sunset/200/150",
+                    "resizable": true,
+                    "contentMode": "fill",
+                    "width": 200,
+                    "height": 150,
+                    "cornerRadius": 12,
+                    "clipped": true
+                  }
                 },
                 {
                   "type": "text",
@@ -82,28 +71,16 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "properties": {
-                        "width": 200,
-                        "height": 150,
-                        "backgroundColor": "blue",
-                        "cornerRadius": 12
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "photo",
-                        "foregroundColor": "white",
-                        "imageWidth": 50,
-                        "imageHeight": 50
-                      }
-                    }
-                  ]
+                  "type": "image",
+                  "properties": {
+                    "imageURL": "https://picsum.photos/seed/ocean/200/150",
+                    "resizable": true,
+                    "contentMode": "fill",
+                    "width": 200,
+                    "height": 150,
+                    "cornerRadius": 12,
+                    "clipped": true
+                  }
                 },
                 {
                   "type": "text",
@@ -122,28 +99,16 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "properties": {
-                        "width": 200,
-                        "height": 150,
-                        "backgroundColor": "green",
-                        "cornerRadius": 12
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "photo",
-                        "foregroundColor": "white",
-                        "imageWidth": 50,
-                        "imageHeight": 50
-                      }
-                    }
-                  ]
+                  "type": "image",
+                  "properties": {
+                    "imageURL": "https://picsum.photos/seed/forest/200/150",
+                    "resizable": true,
+                    "contentMode": "fill",
+                    "width": 200,
+                    "height": 150,
+                    "cornerRadius": 12,
+                    "clipped": true
+                  }
                 },
                 {
                   "type": "text",
@@ -162,28 +127,16 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "properties": {
-                        "width": 200,
-                        "height": 150,
-                        "backgroundColor": "purple",
-                        "cornerRadius": 12
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "photo",
-                        "foregroundColor": "white",
-                        "imageWidth": 50,
-                        "imageHeight": 50
-                      }
-                    }
-                  ]
+                  "type": "image",
+                  "properties": {
+                    "imageURL": "https://picsum.photos/seed/mountains/200/150",
+                    "resizable": true,
+                    "contentMode": "fill",
+                    "width": 200,
+                    "height": 150,
+                    "cornerRadius": 12,
+                    "clipped": true
+                  }
                 },
                 {
                   "type": "text",
@@ -237,7 +190,7 @@
         {
           "type": "text",
           "properties": {
-            "content": "This layout demonstrates: VStack, HStack, ZStack, ScrollView (horizontal), Text, Image, Rectangle, and Divider components all rendered from JSON.",
+            "content": "This layout demonstrates: VStack, HStack, ScrollView (horizontal), AsyncImage loading from URLs, Text, and Divider components all rendered from JSON.",
             "fontSize": 14,
             "foregroundColor": "gray"
           }

@@ -80,6 +80,7 @@ public struct ComponentRenderer: View {
     private func buildScrollView(children: [UIComponent]?, properties: ScrollViewProperties) -> some View {
         let axis: Axis = parseAxis(properties.axis)
         let showsIndicators: Bool = properties.showsIndicators ?? true
+        let shouldDisableClip: Bool = properties.common.clipped == false
 
         if axis == .vertical {
             ScrollView(.vertical, showsIndicators: showsIndicators) {
@@ -89,7 +90,8 @@ public struct ComponentRenderer: View {
                     }
                 }
             }
-            .applyCommonModifiers(properties.common)
+            .scrollClipDisabled(shouldDisableClip)
+            .applyCommonModifiersExceptClipped(properties.common)
         } else {
             ScrollView(.horizontal, showsIndicators: showsIndicators) {
                 if let children = children {
@@ -98,7 +100,8 @@ public struct ComponentRenderer: View {
                     }
                 }
             }
-            .applyCommonModifiers(properties.common)
+            .scrollClipDisabled(shouldDisableClip)
+            .applyCommonModifiersExceptClipped(properties.common)
         }
     }
 
@@ -116,53 +119,29 @@ public struct ComponentRenderer: View {
 
     @ViewBuilder
     private func buildImage(properties: ImageProperties) -> some View {
-        if let imageName = properties.imageName {
-            buildSystemImage(imageName, properties: properties)
-        } else if let imageURL = properties.imageURL {
-            buildAsyncImage(imageURL, properties: properties)
-        }
-    }
-
-    @ViewBuilder
-    private func buildSystemImage(_ name: String, properties: ImageProperties) -> some View {
-        let image: Image = Image(systemName: name)
-        let resizable: Bool = properties.resizable ?? false
-
-        if resizable {
-            image
-                .resizable()
-                .applyImageModifiers(properties)
-                .applyCommonModifiers(properties.common)
-        } else {
-            image
-                .applyImageModifiers(properties)
-                .applyCommonModifiers(properties.common)
-        }
-    }
-
-    @ViewBuilder
-    private func buildAsyncImage(_ urlString: String, properties: ImageProperties) -> some View {
-        AsyncImage(url: URL(string: urlString)) { phase in
-            switch phase {
-            case .empty:
-                ProgressView()
-            case .success(let image):
-                if properties.resizable ?? false {
-                    image
-                        .resizable()
-                        .applyImageModifiers(properties)
-                } else {
-                    image
-                        .applyImageModifiers(properties)
+        if let imageURL = properties.imageURL {
+            AsyncImage(url: URL(string: imageURL)) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                case .success(let image):
+                    if properties.resizable ?? false {
+                        image
+                            .resizable()
+                    } else {
+                        image
+                    }
+                case .failure:
+                    Image(systemName: "photo")
+                        .foregroundColor(.gray)
+                @unknown default:
+                    EmptyView()
                 }
-            case .failure:
-                Image(systemName: "photo")
-                    .foregroundColor(.gray)
-            @unknown default:
-                EmptyView()
             }
+            .applyCommonModifiers(properties.common)
+        } else {
+            EmptyView()
         }
-        .applyCommonModifiers(properties.common)
     }
 
     @ViewBuilder
@@ -257,6 +236,19 @@ extension View {
     func applyCommonModifiers(_ properties: CommonProperties) -> some View {
         self
             .applyFrame(properties)
+            .applyAspectRatio(properties)
+            .applyPadding(properties)
+            .applyForegroundColor(properties)
+            .applyBackgroundColor(properties)
+            .applyCornerRadius(properties)
+            .applyClipped(properties)
+    }
+
+    @ViewBuilder
+    func applyCommonModifiersExceptClipped(_ properties: CommonProperties) -> some View {
+        self
+            .applyFrame(properties)
+            .applyAspectRatio(properties)
             .applyPadding(properties)
             .applyForegroundColor(properties)
             .applyBackgroundColor(properties)
@@ -318,23 +310,30 @@ extension View {
         }
     }
 
-    func applyImageModifiers(_ properties: ImageProperties) -> some View {
-        var view: AnyView = AnyView(self)
+    @ViewBuilder
+    func applyClipped(_ properties: CommonProperties) -> some View {
+        if let clipped = properties.clipped, clipped {
+            self.clipped()
+        } else {
+            self
+        }
+    }
 
+    @ViewBuilder
+    func applyAspectRatio(_ properties: CommonProperties) -> some View {
         if let aspectRatio = properties.aspectRatio {
-            let contentMode: ContentMode = aspectRatio.lowercased() == "fill" ? .fill : .fit
-            view = AnyView(view.aspectRatio(contentMode: contentMode))
+            let mode: ContentMode = parseContentMode(properties.contentMode)
+            self.aspectRatio(aspectRatio, contentMode: mode)
+        } else {
+            self
         }
+    }
 
-        if let width = properties.imageWidth, let height = properties.imageHeight {
-            view = AnyView(view.frame(width: width, height: height))
-        } else if let width = properties.imageWidth {
-            view = AnyView(view.frame(width: width))
-        } else if let height = properties.imageHeight {
-            view = AnyView(view.frame(height: height))
+    private func parseContentMode(_ contentMode: String?) -> ContentMode {
+        switch contentMode?.lowercased() {
+        case "fill": return .fill
+        default: return .fit
         }
-
-        return view
     }
 
     private func parseColor(_ colorString: String) -> Color {

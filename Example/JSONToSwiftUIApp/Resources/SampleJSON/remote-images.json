@@ -1,0 +1,322 @@
+{
+  "type": "scrollView",
+  "properties": {
+    "axis": "vertical",
+    "showsIndicators": true
+  },
+  "children": [
+    {
+      "type": "vstack",
+      "properties": {
+        "spacing": 20,
+        "alignment": "leading",
+        "padding": 16
+      },
+      "children": [
+        {
+          "type": "text",
+          "properties": {
+            "content": "Remote Image Gallery",
+            "fontSize": 32,
+            "fontWeight": "bold"
+          }
+        },
+        {
+          "type": "text",
+          "properties": {
+            "content": "Images loaded from URLs using AsyncImage",
+            "fontSize": 16,
+            "foregroundColor": "gray"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "vstack",
+          "properties": {
+            "spacing": 16
+          },
+          "children": [
+            {
+              "type": "vstack",
+              "properties": {
+                "spacing": 8,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Landscape Photo",
+                    "fontSize": 18,
+                    "fontWeight": "semibold"
+                  }
+                },
+                {
+                  "type": "image",
+                  "properties": {
+                    "imageURL": "https://picsum.photos/400/250",
+                    "resizable": true,
+                    "aspectRatio": "fit",
+                    "cornerRadius": 8,
+                    "maxWidth": 400
+                  }
+                },
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Random landscape from Lorem Picsum",
+                    "fontSize": 14,
+                    "foregroundColor": "gray"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "vstack",
+              "properties": {
+                "spacing": 8,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Square Photo",
+                    "fontSize": 18,
+                    "fontWeight": "semibold"
+                  }
+                },
+                {
+                  "type": "image",
+                  "properties": {
+                    "imageURL": "https://picsum.photos/300/300",
+                    "resizable": true,
+                    "aspectRatio": "fill",
+                    "imageWidth": 300,
+                    "imageHeight": 300,
+                    "cornerRadius": 12
+                  }
+                },
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Square format with fill aspect ratio",
+                    "fontSize": 14,
+                    "foregroundColor": "gray"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "vstack",
+              "properties": {
+                "spacing": 8,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Portrait Photo",
+                    "fontSize": 18,
+                    "fontWeight": "semibold"
+                  }
+                },
+                {
+                  "type": "hstack",
+                  "properties": {
+                    "spacing": 12
+                  },
+                  "children": [
+                    {
+                      "type": "image",
+                      "properties": {
+                        "imageURL": "https://picsum.photos/200/300",
+                        "resizable": true,
+                        "aspectRatio": "fit",
+                        "imageWidth": 150,
+                        "imageHeight": 225,
+                        "cornerRadius": 8
+                      }
+                    },
+                    {
+                      "type": "vstack",
+                      "properties": {
+                        "spacing": 8,
+                        "alignment": "leading"
+                      },
+                      "children": [
+                        {
+                          "type": "text",
+                          "properties": {
+                            "content": "Portrait format images work great for profile pictures or vertical content.",
+                            "fontSize": 14,
+                            "foregroundColor": "gray"
+                          }
+                        },
+                        {
+                          "type": "spacer"
+                        },
+                        {
+                          "type": "button",
+                          "properties": {
+                            "label": "View Details",
+                            "backgroundColor": "blue",
+                            "foregroundColor": "white",
+                            "padding": 10,
+                            "cornerRadius": 8
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vstack",
+              "properties": {
+                "spacing": 8,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Horizontal Scroll Gallery",
+                    "fontSize": 18,
+                    "fontWeight": "semibold"
+                  }
+                },
+                {
+                  "type": "scrollView",
+                  "properties": {
+                    "axis": "horizontal",
+                    "showsIndicators": false
+                  },
+                  "children": [
+                    {
+                      "type": "hstack",
+                      "properties": {
+                        "spacing": 12
+                      },
+                      "children": [
+                        {
+                          "type": "image",
+                          "properties": {
+                            "imageURL": "https://picsum.photos/seed/pic1/200/150",
+                            "resizable": true,
+                            "aspectRatio": "fill",
+                            "imageWidth": 200,
+                            "imageHeight": 150,
+                            "cornerRadius": 8
+                          }
+                        },
+                        {
+                          "type": "image",
+                          "properties": {
+                            "imageURL": "https://picsum.photos/seed/pic2/200/150",
+                            "resizable": true,
+                            "aspectRatio": "fill",
+                            "imageWidth": 200,
+                            "imageHeight": 150,
+                            "cornerRadius": 8
+                          }
+                        },
+                        {
+                          "type": "image",
+                          "properties": {
+                            "imageURL": "https://picsum.photos/seed/pic3/200/150",
+                            "resizable": true,
+                            "aspectRatio": "fill",
+                            "imageWidth": 200,
+                            "imageHeight": 150,
+                            "cornerRadius": 8
+                          }
+                        },
+                        {
+                          "type": "image",
+                          "properties": {
+                            "imageURL": "https://picsum.photos/seed/pic4/200/150",
+                            "resizable": true,
+                            "aspectRatio": "fill",
+                            "imageWidth": 200,
+                            "imageHeight": 150,
+                            "cornerRadius": 8
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Swipe to see more images",
+                    "fontSize": 14,
+                    "foregroundColor": "gray"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "vstack",
+              "properties": {
+                "spacing": 10,
+                "padding": 12,
+                "backgroundColor": "#E3F2FD",
+                "cornerRadius": 10
+              },
+              "children": [
+                {
+                  "type": "hstack",
+                  "properties": {
+                    "spacing": 8
+                  },
+                  "children": [
+                    {
+                      "type": "image",
+                      "properties": {
+                        "imageName": "info.circle.fill",
+                        "foregroundColor": "blue"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "How It Works",
+                        "fontSize": 16,
+                        "fontWeight": "semibold"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "properties": {
+                    "content": "Images are loaded asynchronously using SwiftUI's AsyncImage. A loading spinner appears while fetching, and a fallback icon shows if loading fails.",
+                    "fontSize": 14,
+                    "foregroundColor": "#1976D2"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

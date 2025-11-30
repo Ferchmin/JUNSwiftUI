@@ -27,28 +27,31 @@ struct ContentView: View {
     private let availableSamples: [String] = [
         "simple-layout",
         "complex-layout",
-        "horizontal-scroll"
+        "horizontal-scroll",
+        "remote-images"
     ]
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            sampleSelectorView
-                .navigationTitle("JSON → SwiftUI")
-                .navigationDestination(for: UIComponent.self) { component in
-                    ComponentDetailView(component: component)
-                }
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            showingJSONInput = true
-                        } label: {
-                            Label("Paste JSON", systemImage: "doc.text")
-                        }
+            List {
+                sampleSelectorView
+            }
+            .navigationTitle("JSON → SwiftUI")
+            .navigationDestination(for: UIComponent.self) { component in
+                ComponentDetailView(component: component)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingJSONInput = true
+                    } label: {
+                        Label("Paste JSON", systemImage: "doc.text")
                     }
                 }
-                .sheet(isPresented: $showingJSONInput) {
-                    jsonInputSheet
-                }
+            }
+            .sheet(isPresented: $showingJSONInput) {
+                jsonInputSheet
+            }
         }
     }
 
@@ -56,54 +59,54 @@ struct ContentView: View {
 
     @ViewBuilder
     private var sampleSelectorView: some View {
-        VStack(spacing: 20) {
-            Text("Select a Sample")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .padding(.top, 40)
-
-            Text("Choose a JSON sample to render as SwiftUI")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            List {
-                ForEach(availableSamples, id: \.self) { sample in
-                    Button {
-                        if let component = loadSampleComponent(sample) {
-                            navigationPath.append(component)
-                        }
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(formatSampleName(sample))
-                                    .font(.headline)
-
-                                Text(getSampleDescription(sample))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .font(.caption)
-                        }
-                        .padding(.vertical, 8)
-                        .contentShape(Rectangle())
+        Section {
+            ForEach(availableSamples, id: \.self) { sample in
+                Button {
+                    if let component = loadSampleComponent(sample) {
+                        navigationPath.append(component)
                     }
-                    .buttonStyle(.plain)
-                }
-            }
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(formatSampleName(sample))
+                                .font(.headline)
 
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding()
+                            Text(getSampleDescription(sample))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
+                            .font(.caption)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
+        } header: {
+            VStack {
+                Text("Select a Sample")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .padding(.top, 40)
+
+                Text("Choose a JSON sample to render as SwiftUI")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+        }
+
+        if let errorMessage {
+            Text(errorMessage)
+                .font(.caption)
+                .foregroundColor(.red)
+                .padding()
         }
     }
 
@@ -202,7 +205,9 @@ struct ContentView: View {
         case "complex-layout":
             return "Product list with nested layouts and ScrollView"
         case "horizontal-scroll":
-            return "Horizontal ScrollView with ZStack and shapes"
+            return "Horizontal ScrollView with remote images from URLs"
+        case "remote-images":
+            return "AsyncImage loading from URLs with different layouts"
         default:
             return "JSON-to-SwiftUI example"
         }
