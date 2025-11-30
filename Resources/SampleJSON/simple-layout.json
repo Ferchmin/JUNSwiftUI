@@ -1,0 +1,68 @@
+{
+  "type": "vstack",
+  "properties": {
+    "spacing": 20,
+    "alignment": "center",
+    "padding": 20
+  },
+  "children": [
+    {
+      "type": "text",
+      "properties": {
+        "content": "Welcome to JSON-to-SwiftUI",
+        "fontSize": 28,
+        "fontWeight": "bold",
+        "foregroundColor": "blue"
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "This UI is rendered from JSON",
+        "fontSize": 16,
+        "foregroundColor": "gray"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "hstack",
+      "properties": {
+        "spacing": 15
+      },
+      "children": [
+        {
+          "type": "image",
+          "properties": {
+            "imageName": "star.fill",
+            "foregroundColor": "yellow",
+            "imageWidth": 40,
+            "imageHeight": 40
+          }
+        },
+        {
+          "type": "text",
+          "properties": {
+            "content": "Featured Content",
+            "fontSize": 20,
+            "fontWeight": "semibold"
+          }
+        }
+      ]
+    },
+    {
+      "type": "spacer"
+    },
+    {
+      "type": "button",
+      "properties": {
+        "buttonLabel": "Get Started",
+        "backgroundColor": "blue",
+        "foregroundColor": "white",
+        "padding": 15,
+        "cornerRadius": 10
+      }
+    }
+  ]
+}

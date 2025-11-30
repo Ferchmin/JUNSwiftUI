@@ -1,0 +1,310 @@
+{
+  "type": "scrollView",
+  "properties": {
+    "scrollAxis": "vertical",
+    "showsIndicators": true
+  },
+  "children": [
+    {
+      "type": "vstack",
+      "properties": {
+        "spacing": 20,
+        "alignment": "leading",
+        "padding": 16
+      },
+      "children": [
+        {
+          "type": "text",
+          "properties": {
+            "content": "Product Catalog",
+            "fontSize": 32,
+            "fontWeight": "bold"
+          }
+        },
+        {
+          "type": "text",
+          "properties": {
+            "content": "Browse our latest collection",
+            "fontSize": 16,
+            "foregroundColor": "gray"
+          }
+        },
+        {
+          "type": "vstack",
+          "properties": {
+            "spacing": 15
+          },
+          "children": [
+            {
+              "type": "hstack",
+              "properties": {
+                "spacing": 12,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "zstack",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "properties": {
+                        "width": 80,
+                        "height": 80,
+                        "backgroundColor": "blue",
+                        "cornerRadius": 8
+                      }
+                    },
+                    {
+                      "type": "image",
+                      "properties": {
+                        "imageName": "desktopcomputer",
+                        "foregroundColor": "white",
+                        "imageWidth": 40,
+                        "imageHeight": 40
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "vstack",
+                  "properties": {
+                    "spacing": 4,
+                    "alignment": "leading"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "MacBook Pro",
+                        "fontSize": 18,
+                        "fontWeight": "semibold"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "Powerful performance",
+                        "fontSize": 14,
+                        "foregroundColor": "gray"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "$2,499",
+                        "fontSize": 16,
+                        "fontWeight": "bold",
+                        "foregroundColor": "blue"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "spacer"
+                },
+                {
+                  "type": "image",
+                  "properties": {
+                    "imageName": "chevron.right",
+                    "foregroundColor": "gray"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "hstack",
+              "properties": {
+                "spacing": 12,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "zstack",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "properties": {
+                        "width": 80,
+                        "height": 80,
+                        "backgroundColor": "purple",
+                        "cornerRadius": 8
+                      }
+                    },
+                    {
+                      "type": "image",
+                      "properties": {
+                        "imageName": "iphone",
+                        "foregroundColor": "white",
+                        "imageWidth": 40,
+                        "imageHeight": 40
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "vstack",
+                  "properties": {
+                    "spacing": 4,
+                    "alignment": "leading"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "iPhone 15 Pro",
+                        "fontSize": 18,
+                        "fontWeight": "semibold"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "Latest flagship phone",
+                        "fontSize": 14,
+                        "foregroundColor": "gray"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "$999",
+                        "fontSize": 16,
+                        "fontWeight": "bold",
+                        "foregroundColor": "purple"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "spacer"
+                },
+                {
+                  "type": "image",
+                  "properties": {
+                    "imageName": "chevron.right",
+                    "foregroundColor": "gray"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "hstack",
+              "properties": {
+                "spacing": 12,
+                "padding": 12,
+                "backgroundColor": "#F5F5F5",
+                "cornerRadius": 12
+              },
+              "children": [
+                {
+                  "type": "zstack",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "circle",
+                      "properties": {
+                        "width": 80,
+                        "height": 80,
+                        "backgroundColor": "orange"
+                      }
+                    },
+                    {
+                      "type": "image",
+                      "properties": {
+                        "imageName": "applewatch",
+                        "foregroundColor": "white",
+                        "imageWidth": 40,
+                        "imageHeight": 40
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "vstack",
+                  "properties": {
+                    "spacing": 4,
+                    "alignment": "leading"
+                  },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "Apple Watch Ultra",
+                        "fontSize": 18,
+                        "fontWeight": "semibold"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "Adventure-ready smartwatch",
+                        "fontSize": 14,
+                        "foregroundColor": "gray"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "content": "$799",
+                        "fontSize": 16,
+                        "fontWeight": "bold",
+                        "foregroundColor": "orange"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "spacer"
+                },
+                {
+                  "type": "image",
+                  "properties": {
+                    "imageName": "chevron.right",
+                    "foregroundColor": "gray"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "hstack",
+          "properties": {
+            "spacing": 10
+          },
+          "children": [
+            {
+              "type": "button",
+              "properties": {
+                "buttonLabel": "View All",
+                "backgroundColor": "blue",
+                "foregroundColor": "white",
+                "padding": 12,
+                "cornerRadius": 8
+              }
+            },
+            {
+              "type": "button",
+              "properties": {
+                "buttonLabel": "Cart",
+                "backgroundColor": "#E5E5E5",
+                "foregroundColor": "black",
+                "padding": 12,
+                "cornerRadius": 8
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

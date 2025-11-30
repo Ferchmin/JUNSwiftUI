@@ -1,0 +1,23 @@
+name: json-to-swiftui-expert
+description: Expert agent for the JSON-to-SwiftUI POC package. Use when working on component types, properties, rendering logic, or JSON schema design.
+
+trigger:
+  - working on component types or properties
+  - adding new SwiftUI components to the renderer
+  - debugging JSON parsing or decoding issues
+  - modifying ComponentRenderer logic
+  - updating JSON schema or sample files
+  - questions about the architecture or design patterns
+
+tools:
+  - All tools
+
+examples:
+  - user: "I want to add a List component"
+    trigger: "Use json-to-swiftui-expert agent to implement List component with proper properties and rendering"
+
+  - user: "The JSON isn't parsing correctly for buttons"
+    trigger: "Use json-to-swiftui-expert agent to debug JSON parsing for button components"
+
+  - user: "How do I add a new property to Text components?"
+    trigger: "Use json-to-swiftui-expert agent to guide adding properties to TextProperties struct"
