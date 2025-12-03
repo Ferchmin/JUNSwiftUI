@@ -60,7 +60,7 @@
                   "properties": {
                     "imageURL": "https://picsum.photos/400/250",
                     "resizable": true,
-                    "aspectRatio": "fit",
+                    "contentMode": "fit",
                     "cornerRadius": 8,
                     "maxWidth": 400
                   }
@@ -97,10 +97,11 @@
                   "properties": {
                     "imageURL": "https://picsum.photos/300/300",
                     "resizable": true,
-                    "aspectRatio": "fill",
-                    "imageWidth": 300,
-                    "imageHeight": 300,
-                    "cornerRadius": 12
+                    "contentMode": "fill",
+                    "width": 300,
+                    "height": 300,
+                    "cornerRadius": 12,
+                    "clipped": true
                   }
                 },
                 {
@@ -141,9 +142,9 @@
                       "properties": {
                         "imageURL": "https://picsum.photos/200/300",
                         "resizable": true,
-                        "aspectRatio": "fit",
-                        "imageWidth": 150,
-                        "imageHeight": 225,
+                        "contentMode": "fit",
+                        "width": 150,
+                        "height": 225,
                         "cornerRadius": 8
                       }
                     },
@@ -216,10 +217,11 @@
                           "properties": {
                             "imageURL": "https://picsum.photos/seed/pic1/200/150",
                             "resizable": true,
-                            "aspectRatio": "fill",
-                            "imageWidth": 200,
-                            "imageHeight": 150,
-                            "cornerRadius": 8
+                            "contentMode": "fill",
+                            "width": 200,
+                            "height": 150,
+                            "cornerRadius": 8,
+                            "clipped": true
                           }
                         },
                         {
@@ -227,10 +229,11 @@
                           "properties": {
                             "imageURL": "https://picsum.photos/seed/pic2/200/150",
                             "resizable": true,
-                            "aspectRatio": "fill",
-                            "imageWidth": 200,
-                            "imageHeight": 150,
-                            "cornerRadius": 8
+                            "contentMode": "fill",
+                            "width": 200,
+                            "height": 150,
+                            "cornerRadius": 8,
+                            "clipped": true
                           }
                         },
                         {
@@ -238,10 +241,11 @@
                           "properties": {
                             "imageURL": "https://picsum.photos/seed/pic3/200/150",
                             "resizable": true,
-                            "aspectRatio": "fill",
-                            "imageWidth": 200,
-                            "imageHeight": 150,
-                            "cornerRadius": 8
+                            "contentMode": "fill",
+                            "width": 200,
+                            "height": 150,
+                            "cornerRadius": 8,
+                            "clipped": true
                           }
                         },
                         {
@@ -249,10 +253,11 @@
                           "properties": {
                             "imageURL": "https://picsum.photos/seed/pic4/200/150",
                             "resizable": true,
-                            "aspectRatio": "fill",
-                            "imageWidth": 200,
-                            "imageHeight": 150,
-                            "cornerRadius": 8
+                            "contentMode": "fill",
+                            "width": 200,
+                            "height": 150,
+                            "cornerRadius": 8,
+                            "clipped": true
                           }
                         }
                       ]
@@ -282,27 +287,12 @@
               },
               "children": [
                 {
-                  "type": "hstack",
+                  "type": "text",
                   "properties": {
-                    "spacing": 8
-                  },
-                  "children": [
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "info.circle.fill",
-                        "foregroundColor": "blue"
-                      }
-                    },
-                    {
-                      "type": "text",
-                      "properties": {
-                        "content": "How It Works",
-                        "fontSize": 16,
-                        "fontWeight": "semibold"
-                      }
-                    }
-                  ]
+                    "content": "ℹ️ How It Works",
+                    "fontSize": 16,
+                    "fontWeight": "semibold"
+                  }
                 },
                 {
                   "type": "text",

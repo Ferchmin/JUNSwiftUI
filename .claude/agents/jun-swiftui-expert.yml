@@ -1,0 +1,27 @@
+name: jun-swiftui-expert
+description: Expert agent for the JUNSwiftUI package - SwiftUI implementation of the JUN (JSON UI Notation) specification. Use when working on component types, properties, rendering logic, or JUN compliance.
+
+trigger:
+  - working on component types or properties
+  - adding new SwiftUI components to the renderer
+  - debugging JSON parsing or decoding issues
+  - modifying ComponentRenderer logic
+  - updating JUN compliance
+  - questions about the architecture or design patterns
+  - implementing JUN spec features
+
+tools:
+  - All tools
+
+examples:
+  - user: "I want to add a List component"
+    trigger: "Use jun-swiftui-expert agent to implement List component following JUN spec with proper properties and rendering"
+
+  - user: "The JSON isn't parsing correctly for buttons"
+    trigger: "Use jun-swiftui-expert agent to debug JSON parsing for button components"
+
+  - user: "How do I add a new property to Text components?"
+    trigger: "Use jun-swiftui-expert agent to guide adding properties to TextProperties struct"
+
+  - user: "How does JUNSwiftUI implement the clipped property?"
+    trigger: "Use jun-swiftui-expert agent to explain SwiftUI-specific implementation details"

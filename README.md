@@ -1,6 +1,6 @@
 # JUNSwiftUI
 
-SwiftUI implementation of the [JUN (JSON UI Notation)](https://github.com/yourusername/JUN) specification.
+SwiftUI implementation of the [JUN (JSON UI Notation)](https://github.com/ferchmin/JUN) specification.
 
 **Platform**: iOS 17+ / macOS 14+
 **Language**: Swift 5.9+
@@ -10,7 +10,7 @@ SwiftUI implementation of the [JUN (JSON UI Notation)](https://github.com/yourus
 
 ## Overview
 
-JUNSwiftUI is a Swift Package that renders [JUN](https://github.com/yourusername/JUN) JSON definitions as native SwiftUI views. It provides a type-safe, performant implementation using Swift's Codable and SwiftUI's declarative syntax.
+JUNSwiftUI is a Swift Package that renders [JUN](https://github.com/ferchmin/JUN) JSON definitions as native SwiftUI views. It provides a type-safe, performant implementation using Swift's Codable and SwiftUI's declarative syntax.
 
 ## Features
 
@@ -30,13 +30,13 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/JUNSwiftUI.git", from: "1.0.0")
+    .package(url: "https://github.com/ferchmin/JUNSwiftUI.git", from: "1.0.0")
 ]
 ```
 
 Or in Xcode:
 1. File → Add Package Dependencies
-2. Enter: `https://github.com/yourusername/JUNSwiftUI`
+2. Enter: `https://github.com/ferchmin/JUNSwiftUI`
 3. Select version and add to target
 
 ## Quick Start
@@ -60,7 +60,8 @@ struct ContentView: View {
               "properties": {
                 "content": "Hello, JUN!",
                 "fontSize": 28,
-                "fontWeight": "bold"
+                "fontWeight": "bold",
+                "font": "Helvetica"
               }
             }
           ]
@@ -150,6 +151,7 @@ Universal properties apply SwiftUI modifiers:
 | `clipped` | `.clipped()` |
 | `aspectRatio` | `.aspectRatio(_:contentMode:)` |
 | `contentMode` | ContentMode parameter |
+| `font` | `.font(.custom(_))` |
 
 ### ScrollView Clipping
 
@@ -170,6 +172,28 @@ Images use SwiftUI's `AsyncImage`:
 Supports:
 - **Named colors**: Maps to SwiftUI `Color` constants
 - **Hex colors**: Custom parser for `#RRGGBB` and `#RRGGBBAA` formats
+
+### Font Support
+
+The `font` property allows specifying custom fonts by name:
+- **System fonts**: "Helvetica", "Courier", "Georgia", etc.
+- **Custom fonts**: Register in app bundle and reference by PostScript name
+- **SF Pro variants**: "SFProDisplay-Regular", "SFProText-Bold", etc.
+
+Example:
+```json
+{
+  "type": "text",
+  "properties": {
+    "content": "Custom Font Text",
+    "fontSize": 24,
+    "font": "Helvetica",
+    "foregroundColor": "blue"
+  }
+}
+```
+
+**Note**: Custom fonts must be registered in Info.plist under "Fonts provided by application" (UIAppFonts).
 
 ## Project Structure
 
@@ -197,7 +221,7 @@ JUNSwiftUI/
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/JUNSwiftUI.git
+   git clone https://github.com/ferchmin/JUNSwiftUI.git
    cd JUNSwiftUI
    ```
 
@@ -254,9 +278,9 @@ public enum JSONLoaderError: LocalizedError {
 
 ## Specification
 
-This implementation follows the [JUN v1.0 Specification](https://github.com/yourusername/JUN/blob/main/spec/jun-spec.md).
+This implementation follows the [JUN v1.0 Specification](https://github.com/ferchmin/JUN/blob/main/spec/jun-spec.md).
 
-For complete format documentation, see the [JUN repository](https://github.com/yourusername/JUN).
+For complete format documentation, see the [JUN repository](https://github.com/ferchmin/JUN).
 
 ## Known Limitations
 
@@ -275,7 +299,7 @@ Contributions welcome! Please ensure:
 
 ## Related Projects
 
-- **[JUN Specification](https://github.com/yourusername/JUN)** - Main specification repo
+- **[JUN Specification](https://github.com/ferchmin/JUN)** - Main specification repo
 - **JUNReact** - React implementation (coming soon)
 - **JUNAndroid** - Android/Compose implementation (coming soon)
 
@@ -289,4 +313,4 @@ Pawel Zgoda-Ferchmin
 
 ---
 
-Part of the **JUN** ecosystem - [JUN Specification](https://github.com/yourusername/JUN)
+Part of the **JUN** ecosystem - [JUN Specification](https://github.com/ferchmin/JUN)

@@ -292,6 +292,7 @@ struct CommonProperties: Codable, Equatable {
     let clipped: Bool?
     let aspectRatio: CGFloat?
     let contentMode: String?
+    let font: String?
 
     init(
         padding: CGFloat? = nil,
@@ -304,7 +305,8 @@ struct CommonProperties: Codable, Equatable {
         cornerRadius: CGFloat? = nil,
         clipped: Bool? = nil,
         aspectRatio: CGFloat? = nil,
-        contentMode: String? = nil
+        contentMode: String? = nil,
+        font: String? = nil
     ) {
         self.padding = padding
         self.width = width
@@ -317,6 +319,7 @@ struct CommonProperties: Codable, Equatable {
         self.clipped = clipped
         self.aspectRatio = aspectRatio
         self.contentMode = contentMode
+        self.font = font
     }
 }
 

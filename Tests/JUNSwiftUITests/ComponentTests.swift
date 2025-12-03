@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import JSONToSwiftUIPOCLib
+@testable import JUNSwiftUI
 
 @Suite("UIComponent Tests")
 struct ComponentTests {
@@ -84,9 +84,10 @@ struct ComponentTests {
         {
             "type": "image",
             "properties": {
-                "imageName": "star.fill",
-                "imageWidth": 40,
-                "imageHeight": 40,
+                "imageURL": "https://example.com/image.jpg",
+                "resizable": true,
+                "width": 40,
+                "height": 40,
                 "foregroundColor": "yellow"
             }
         }
@@ -99,9 +100,90 @@ struct ComponentTests {
             return
         }
 
-        #expect(props.imageName == "star.fill")
-        #expect(props.imageWidth == 40)
-        #expect(props.imageHeight == 40)
+        #expect(props.imageURL == "https://example.com/image.jpg")
+        #expect(props.resizable == true)
+        #expect(props.common.width == 40)
+        #expect(props.common.height == 40)
         #expect(props.common.foregroundColor == "yellow")
+    }
+
+    @Test("Font property decodes correctly in text component")
+    func testFontProperty() throws {
+        let json: String = """
+        {
+            "type": "text",
+            "properties": {
+                "content": "Custom Font Text",
+                "fontSize": 24,
+                "fontWeight": "bold",
+                "font": "Helvetica",
+                "foregroundColor": "blue"
+            }
+        }
+        """
+
+        let component: UIComponent = try JSONLoader.loadFromString(json)
+
+        guard case .text(let props) = component.type else {
+            Issue.record("Expected text type")
+            return
+        }
+
+        #expect(props.content == "Custom Font Text")
+        #expect(props.fontSize == 24)
+        #expect(props.fontWeight == "bold")
+        #expect(props.common.font == "Helvetica")
+        #expect(props.common.foregroundColor == "blue")
+    }
+
+    @Test("Font property works with button component")
+    func testFontPropertyOnButton() throws {
+        let json: String = """
+        {
+            "type": "button",
+            "properties": {
+                "label": "Custom Font Button",
+                "font": "Georgia",
+                "backgroundColor": "blue",
+                "foregroundColor": "white"
+            }
+        }
+        """
+
+        let component: UIComponent = try JSONLoader.loadFromString(json)
+
+        guard case .button(let props) = component.type else {
+            Issue.record("Expected button type")
+            return
+        }
+
+        #expect(props.label == "Custom Font Button")
+        #expect(props.common.font == "Georgia")
+        #expect(props.common.backgroundColor == "blue")
+        #expect(props.common.foregroundColor == "white")
+    }
+
+    @Test("Font property is optional")
+    func testFontPropertyOptional() throws {
+        let json: String = """
+        {
+            "type": "text",
+            "properties": {
+                "content": "System Font Text",
+                "fontSize": 18
+            }
+        }
+        """
+
+        let component: UIComponent = try JSONLoader.loadFromString(json)
+
+        guard case .text(let props) = component.type else {
+            Issue.record("Expected text type")
+            return
+        }
+
+        #expect(props.content == "System Font Text")
+        #expect(props.fontSize == 18)
+        #expect(props.common.font == nil)
     }
 }

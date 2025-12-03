@@ -112,9 +112,17 @@ public struct ComponentRenderer: View {
         let fontSize: CGFloat = properties.fontSize ?? 16
         let fontWeight: Font.Weight = parseFontWeight(properties.fontWeight)
 
-        Text(properties.content)
-            .font(.system(size: fontSize, weight: fontWeight))
-            .applyCommonModifiers(properties.common)
+        // Use custom font if specified in common properties, otherwise use system font
+        if let fontName = properties.common.font {
+            Text(properties.content)
+                .font(.custom(fontName, size: fontSize))
+                .fontWeight(fontWeight)
+                .applyCommonModifiersExceptFont(properties.common)
+        } else {
+            Text(properties.content)
+                .font(.system(size: fontSize, weight: fontWeight))
+                .applyCommonModifiersExceptFont(properties.common)
+        }
     }
 
     @ViewBuilder
@@ -235,6 +243,7 @@ extension View {
     @ViewBuilder
     func applyCommonModifiers(_ properties: CommonProperties) -> some View {
         self
+            .applyFont(properties)
             .applyFrame(properties)
             .applyAspectRatio(properties)
             .applyPadding(properties)
@@ -247,12 +256,25 @@ extension View {
     @ViewBuilder
     func applyCommonModifiersExceptClipped(_ properties: CommonProperties) -> some View {
         self
+            .applyFont(properties)
             .applyFrame(properties)
             .applyAspectRatio(properties)
             .applyPadding(properties)
             .applyForegroundColor(properties)
             .applyBackgroundColor(properties)
             .applyCornerRadius(properties)
+    }
+
+    @ViewBuilder
+    func applyCommonModifiersExceptFont(_ properties: CommonProperties) -> some View {
+        self
+            .applyFrame(properties)
+            .applyAspectRatio(properties)
+            .applyPadding(properties)
+            .applyForegroundColor(properties)
+            .applyBackgroundColor(properties)
+            .applyCornerRadius(properties)
+            .applyClipped(properties)
     }
 
     @ViewBuilder
@@ -324,6 +346,15 @@ extension View {
         if let aspectRatio = properties.aspectRatio {
             let mode: ContentMode = parseContentMode(properties.contentMode)
             self.aspectRatio(aspectRatio, contentMode: mode)
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
+    func applyFont(_ properties: CommonProperties) -> some View {
+        if let fontName = properties.font {
+            self.font(.custom(fontName, size: 16))
         } else {
             self
         }

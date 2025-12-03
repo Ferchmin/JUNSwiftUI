@@ -18,7 +18,8 @@ struct ContentView: View {
         "simple-layout",
         "complex-layout",
         "horizontal-scroll",
-        "remote-images"
+        "remote-images",
+        "font-showcase"
     ]
 
     var body: some View {
@@ -198,6 +199,8 @@ struct ContentView: View {
             return "Horizontal ScrollView with remote images from URLs"
         case "remote-images":
             return "AsyncImage loading from URLs with different layouts"
+        case "font-showcase":
+            return "Custom font examples with Helvetica, Courier, and Georgia"
         default:
             return "JSON-to-SwiftUI example"
         }

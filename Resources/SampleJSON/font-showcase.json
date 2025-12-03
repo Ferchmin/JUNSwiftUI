@@ -1,0 +1,173 @@
+{
+  "type": "vstack",
+  "properties": {
+    "spacing": 20,
+    "alignment": "center",
+    "padding": 20,
+    "backgroundColor": "#F5F5F5"
+  },
+  "children": [
+    {
+      "type": "text",
+      "properties": {
+        "content": "Font Showcase",
+        "fontSize": 32,
+        "fontWeight": "bold",
+        "foregroundColor": "#333333",
+        "padding": 10
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "Default System Font",
+        "fontSize": 20,
+        "fontWeight": "regular",
+        "foregroundColor": "blue",
+        "padding": 8
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "Helvetica Font",
+        "fontSize": 20,
+        "font": "Helvetica",
+        "foregroundColor": "#FF6B6B",
+        "padding": 8
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "Courier Font - Monospace",
+        "fontSize": 18,
+        "font": "Courier",
+        "foregroundColor": "#4ECDC4",
+        "padding": 8
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "Georgia Font - Serif",
+        "fontSize": 20,
+        "font": "Georgia",
+        "foregroundColor": "#95E1D3",
+        "padding": 8
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "Helvetica Neue with Bold Weight",
+        "fontSize": 22,
+        "fontWeight": "bold",
+        "font": "HelveticaNeue",
+        "foregroundColor": "#F38181",
+        "padding": 8
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "hstack",
+      "properties": {
+        "spacing": 20,
+        "padding": 10
+      },
+      "children": [
+        {
+          "type": "vstack",
+          "properties": {
+            "spacing": 8,
+            "alignment": "leading"
+          },
+          "children": [
+            {
+              "type": "text",
+              "properties": {
+                "content": "Small Text",
+                "fontSize": 12,
+                "font": "Helvetica",
+                "foregroundColor": "gray"
+              }
+            },
+            {
+              "type": "text",
+              "properties": {
+                "content": "Medium Text",
+                "fontSize": 16,
+                "font": "Helvetica",
+                "foregroundColor": "gray"
+              }
+            },
+            {
+              "type": "text",
+              "properties": {
+                "content": "Large Text",
+                "fontSize": 24,
+                "font": "Helvetica",
+                "foregroundColor": "gray"
+              }
+            }
+          ]
+        },
+        {
+          "type": "vstack",
+          "properties": {
+            "spacing": 8,
+            "alignment": "trailing"
+          },
+          "children": [
+            {
+              "type": "text",
+              "properties": {
+                "content": "Courier Small",
+                "fontSize": 12,
+                "font": "Courier",
+                "foregroundColor": "purple"
+              }
+            },
+            {
+              "type": "text",
+              "properties": {
+                "content": "Courier Medium",
+                "fontSize": 16,
+                "font": "Courier",
+                "foregroundColor": "purple"
+              }
+            },
+            {
+              "type": "text",
+              "properties": {
+                "content": "Courier Large",
+                "fontSize": 24,
+                "font": "Courier",
+                "foregroundColor": "purple"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "spacer"
+    },
+    {
+      "type": "button",
+      "properties": {
+        "label": "Custom Font Button",
+        "font": "Helvetica-Bold",
+        "backgroundColor": "#6C5CE7",
+        "foregroundColor": "white",
+        "padding": 15,
+        "cornerRadius": 10
+      }
+    }
+  ]
+}
