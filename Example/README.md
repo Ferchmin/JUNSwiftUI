@@ -1,152 +1,80 @@
 # JUNSwiftUI Example App
 
-This example app demonstrates the JUNSwiftUI library rendering JSON UI definitions.
+Demonstrates JUNSwiftUI rendering JUN documents.
 
-## Running the App
-
-### Option 1: Open in Xcode (Recommended)
+## Running
 
 ```bash
-cd /Users/pawel/Developer/JUNSwiftUI/Example
-open JUNSwiftUIApp.xcodeproj
-```
-
-Then press ⌘R to build and run.
-
-### Option 2: From Package Root
-
-```bash
-cd /Users/pawel/Developer/JUNSwiftUI
 open Example/JUNSwiftUIApp.xcodeproj
 ```
 
-## Available Sample Layouts
+Select the `JUNSwiftUIApp` scheme and press ⌘R. The project references the package by relative
+path, so it builds against your working copy with no extra setup.
 
-The app includes several pre-configured sample layouts:
+## What it shows
 
-### 1. Simple Layout
-- **Description**: Basic VStack, HStack, Text, Image, Button
-- **Demonstrates**: Fundamental JUN components and layout
+- **Sample browser** — the canonical JUN examples, rendered
+- **Paste JSON** — render your own document from the toolbar
+- **Diagnostics banner** — what parsing found wrong, and where
+- **Action handling** — the counter example's actions, interpreted by the app
 
-### 2. Complex Layout
-- **Description**: Product list with nested layouts and ScrollView
-- **Demonstrates**: Advanced nesting, cards, shapes
+## Samples
 
-### 3. Horizontal Scroll
-- **Description**: Horizontal ScrollView with remote images from URLs
-- **Demonstrates**: Scrolling behavior, image loading
+These come from the [JUN repository](https://github.com/ferchmin/JUN) and are synced by
+`Scripts/sync-examples.sh` into `JUNSwiftUIApp/Resources/Examples/`. Edit them upstream, not
+here — CI fails if the copies drift.
 
-### 4. Remote Images ✨
-- **Description**: AsyncImage loading from URLs with different layouts
-- **Demonstrates**:
-  - Remote image loading from picsum.photos
-  - Various image sizes and aspect ratios
-  - Circular images with cornerRadius
-  - Image gallery layouts
-  - Loading states with ProgressView
+| Sample | Demonstrates |
+|--------|--------------|
+| Simple Layout | VStack, HStack, Text, shapes, a button |
+| Product List | Nested cards inside a scroll view |
+| Horizontal Scroll | Horizontal gallery with remote images |
+| Remote Images | AsyncImage sizing, clipping and loading states |
+| Font Showcase | The `font` property across several typefaces |
+| Counter | Actions with parameters, handled by this app |
 
-### 5. Font Showcase ✨ NEW
-- **Description**: Custom font examples with Helvetica, Courier, and Georgia
-- **Demonstrates**:
-  - Custom font support with `font` property
-  - System fonts (Helvetica, Courier, Georgia, HelveticaNeue)
-  - Font combinations with fontSize and fontWeight
-  - Multiple fonts in a single layout
+## Actions
 
-## Testing Custom Fonts
+The counter example is the one that does something. Its buttons name an intent —
+`adjustCount` with a `by` parameter, and `resetCount` — and `DocumentDetailView` decides what
+those mean:
 
-The **Font Showcase** example demonstrates custom fonts:
-
-```json
-{
-  "type": "text",
-  "properties": {
-    "content": "Helvetica Font",
-    "fontSize": 20,
-    "font": "Helvetica",
-    "foregroundColor": "#FF6B6B"
-  }
-}
+```swift
+ComponentRenderer(document: document)
+    .junActionHandler { action in
+        switch action.name {
+        case "adjustCount": count += action.params["by"]?.intValue ?? 0
+        case "resetCount":  count = 0
+        default: break
+        }
+    }
 ```
 
-**Available system fonts:**
-- `Helvetica`
-- `Courier` (monospace)
-- `Georgia` (serif)
-- `HelveticaNeue`
-- And more system fonts available on iOS/macOS
+Remove the handler and the buttons do nothing at all. That is the design: a document names an
+intent, the app decides whether it means anything.
 
-## Testing Remote Images
+The banner along the bottom reports the last action received, so you can see the parameters
+arriving.
 
-The **Remote Images** example demonstrates AsyncImage:
+## Diagnostics
 
-```json
-{
-  "type": "image",
-  "properties": {
-    "imageURL": "https://picsum.photos/400/250",
-    "resizable": true,
-    "contentMode": "fit",
-    "cornerRadius": 8,
-    "maxWidth": 400
-  }
-}
-```
-
-**Features:**
-- Asynchronous loading with ProgressView while loading
-- Fallback icon on error
-- Various aspect ratios and content modes
-- Rounded corners and clipping
-
-## Custom JSON Input
-
-Use the "Paste JSON" button (document icon in toolbar) to test your own JSON definitions:
-
-1. Tap the document icon in the top-right
-2. Paste your JUN JSON
-3. Tap "Render" to see the result
+Paste something malformed — a `fontSize` in quotes, an image with no source, a component type
+that does not exist — and the banner above the render shows what was found and where. The
+document still renders whatever it could parse.
 
 ## Troubleshooting
 
-### Images not loading
-- Ensure you have an active internet connection
-- picsum.photos may occasionally be slow - wait for the loading indicator
-- Try different image URLs if needed
+**Images do not load.** The remote samples use `picsum.photos` and need network access.
+Offline, they render the failure placeholder, which is the intended behaviour rather than a
+bug.
 
-### Fonts not displaying correctly
-- System fonts (Helvetica, Courier, Georgia) should work out of the box
-- Custom app fonts require registration in Info.plist
-- Check font name spelling (case-sensitive)
+**Fonts look wrong.** System faces (Helvetica, Courier, Georgia) resolve out of the box.
+Application-bundled fonts must be registered under `UIAppFonts` in `Info.plist`, and names are
+case-sensitive.
 
-### App not building
-- Make sure you're using Xcode 15.0 or later
-- Clean build folder: Product → Clean Build Folder (⇧⌘K)
-- Close and reopen Xcode if needed
+**A sample is missing from the list.** Run `./Scripts/sync-examples.sh` from the repository
+root.
 
 ## Requirements
 
-- iOS 17.0+ or macOS 14.0+
-- Xcode 15.0+
-- Swift 5.9+
-
-## Features Demonstrated
-
-- ✅ All JUN v1.0 component types
-- ✅ Universal properties (padding, colors, sizing, etc.)
-- ✅ AsyncImage with remote URLs
-- ✅ Custom fonts (NEW in v1.1)
-- ✅ Nested layouts
-- ✅ ScrollViews (vertical and horizontal)
-- ✅ Shapes with styling
-- ✅ Interactive buttons
-- ✅ Dynamic JSON loading
-
-## Sample JSON Files
-
-All sample JSON files are located in:
-```
-Example/JUNSwiftUIApp/Resources/SampleJSON/
-```
-
-You can edit these files directly to experiment with different layouts.
+iOS 17.0+, Xcode 15.0+

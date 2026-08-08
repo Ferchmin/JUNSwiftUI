@@ -1,0 +1,89 @@
+{
+  "type": "vstack",
+  "properties": {
+    "spacing": 24,
+    "alignment": "center",
+    "padding": 32
+  },
+  "children": [
+    {
+      "type": "text",
+      "properties": {
+        "content": "Counter",
+        "fontSize": 28,
+        "fontWeight": "bold"
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "Buttons name an intent. The host application owns the count.",
+        "fontSize": 14,
+        "foregroundColor": "gray"
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "content": "0",
+        "fontSize": 64,
+        "fontWeight": "semibold",
+        "font": "Menlo"
+      }
+    },
+    {
+      "type": "hstack",
+      "properties": {
+        "spacing": 16
+      },
+      "children": [
+        {
+          "type": "button",
+          "properties": {
+            "label": "−1",
+            "action": {
+              "name": "adjustCount",
+              "params": {
+                "by": -1
+              }
+            },
+            "backgroundColor": "#E5E5E5",
+            "foregroundColor": "black",
+            "padding": 14,
+            "cornerRadius": 10,
+            "width": 96
+          }
+        },
+        {
+          "type": "button",
+          "properties": {
+            "label": "+1",
+            "action": {
+              "name": "adjustCount",
+              "params": {
+                "by": 1
+              }
+            },
+            "backgroundColor": "blue",
+            "foregroundColor": "white",
+            "padding": 14,
+            "cornerRadius": 10,
+            "width": 96
+          }
+        }
+      ]
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "button",
+      "properties": {
+        "label": "Reset",
+        "action": "resetCount",
+        "foregroundColor": "red",
+        "padding": 12
+      }
+    }
+  ]
+}

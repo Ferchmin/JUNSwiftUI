@@ -353,7 +353,7 @@
 /* Begin XCLocalSwiftPackageReference section */
 		E5FE2BFC2EDC9DA300E6D285 /* XCLocalSwiftPackageReference "../../JUNSwiftUI" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../JUNSwiftUI;
+			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
 

@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test
+    # macos-15 ships Xcode 16, which is what the swift-testing framework the suite uses needs.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: swift --version
+
+      - name: Build
+        run: swift build -v
+
+      - name: Test
+        run: swift test -v
+
+  example-app:
+    name: Build the example app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build for the simulator
+        run: |
+          xcodebuild build \
+            -project Example/JUNSwiftUIApp.xcodeproj \
+            -scheme JUNSwiftUIApp \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+  examples:
+    name: Examples match upstream JUN
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install jsonschema
+        run: pip install --quiet jsonschema
+
+      - name: Validate every committed example against the JUN schema
+        run: python3 Scripts/validate_examples.py
+
+      - name: Check the committed examples have not drifted from upstream
+        run: ./Scripts/sync-examples.sh --check
+
+  lint:
+    name: SwiftLint
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      # Reports violations without failing the build. Tighten to `--strict` once the existing
+      # sources have been run through it once and the baseline is clean.
+      - name: Lint
+        run: swiftlint lint --reporter github-actions-logging

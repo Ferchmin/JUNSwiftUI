@@ -25,9 +25,9 @@
     {
       "type": "scrollView",
       "properties": {
-        "scrollAxis": "horizontal",
+        "axis": "horizontal",
         "showsIndicators": false,
-        "clipped": false,
+        "clipped": false
       },
       "children": [
         {
@@ -165,27 +165,12 @@
       },
       "children": [
         {
-          "type": "hstack",
+          "type": "text",
           "properties": {
-            "spacing": 8
-          },
-          "children": [
-            {
-              "type": "image",
-              "properties": {
-                "imageName": "info.circle.fill",
-                "foregroundColor": "blue"
-              }
-            },
-            {
-              "type": "text",
-              "properties": {
-                "content": "Component Showcase",
-                "fontSize": 16,
-                "fontWeight": "semibold"
-              }
-            }
-          ]
+            "content": "Component Showcase",
+            "fontSize": 16,
+            "fontWeight": "semibold"
+          }
         },
         {
           "type": "text",

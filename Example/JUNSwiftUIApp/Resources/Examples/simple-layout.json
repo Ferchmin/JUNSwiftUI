@@ -9,7 +9,7 @@
     {
       "type": "text",
       "properties": {
-        "content": "Welcome to JSON-to-SwiftUI",
+        "content": "Welcome to JUN",
         "fontSize": 28,
         "fontWeight": "bold",
         "foregroundColor": "blue"
@@ -33,12 +33,11 @@
       },
       "children": [
         {
-          "type": "image",
+          "type": "circle",
           "properties": {
-            "imageName": "star.fill",
-            "foregroundColor": "yellow",
-            "imageWidth": 40,
-            "imageHeight": 40
+            "width": 40,
+            "height": 40,
+            "backgroundColor": "yellow"
           }
         },
         {
@@ -57,7 +56,7 @@
     {
       "type": "button",
       "properties": {
-        "buttonLabel": "Get Started",
+        "label": "Get Started",
         "backgroundColor": "blue",
         "foregroundColor": "white",
         "padding": 15,

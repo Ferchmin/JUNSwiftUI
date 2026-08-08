@@ -1,54 +1,52 @@
 # Claude Code Configuration
 
-This directory contains specialized agents for working with the JSONToSwiftUIPOC package.
+Specialized agents for working on the JUNSwiftUI package.
 
-## Available Agents
+## Available agents
 
-### `json-to-swiftui-expert`
+### `jun-swiftui-expert`
 
-Expert agent for the JSON-to-SwiftUI POC architecture.
+Knows this package's architecture and the JUN specification it implements.
 
 **Use when:**
-- Adding new component types (List, Form, TextField, etc.)
-- Modifying component properties or rendering logic
-- Debugging JSON parsing or Codable issues
-- Understanding the type-safe architecture
-- Creating sample JSON files
-- Writing tests for components
 
-**Examples:**
+- Adding or changing component types and their properties
+- Working on decoding, diagnostics, or the parse policies
+- Debugging why a document renders the way it does
+- Writing tests for components or parse behaviour
+
+## Working on this repository
+
+Two things are easy to get wrong here, both of which have caused real defects:
+
+1. **Specification changes belong in the [JUN repository](https://github.com/ferchmin/JUN)
+   first** — prose, JSON Schema and examples in one change — and land here afterwards. The v1.1
+   schema shipped without the property v1.1 was released for because it was written the other
+   way round.
+
+2. **Example documents come from upstream.** They are synced into
+   `Example/JUNSwiftUIApp/Resources/Examples/` by `Scripts/sync-examples.sh`, and CI fails if
+   the committed copies drift. Edit them in the JUN repository, then re-sync.
+
+## Architecture in brief
+
+- `Models/` — the component tree and its per-type property structs. Decoding is hand-written
+  because the JSON is flat while the model is not.
+- `Parsing/` — loaders, options, and the diagnostic collection threaded through decoding via
+  `JSONDecoder.userInfo`.
+- `Views/` — the renderer, the universal-property modifier, action dispatch, color parsing.
+
+Two invariants worth keeping in mind when changing the parser:
+
+- **Unknown things degrade; malformed things are reported.** These pull in opposite directions
+  and must not be collapsed into one policy.
+- **A malformed component must never take out its siblings.** Children decode one element at a
+  time for this reason.
+
+## Invoking agents
+
+Agents are suggested automatically, or ask for one by name:
 
 ```
-User: "I want to add a TextField component"
-→ Use json-to-swiftui-expert agent to implement TextField with proper properties
+Use the jun-swiftui-expert agent to add a new component type
 ```
-
-```
-User: "Why isn't my button's backgroundColor working?"
-→ Use json-to-swiftui-expert agent to debug button rendering
-```
-
-```
-User: "How do I add a new common property for all components?"
-→ Use json-to-swiftui-expert agent to guide adding properties to CommonProperties
-```
-
-## Agent Knowledge
-
-The agent has deep knowledge of:
-
-- **Architecture:** ComponentProperties enum, type-safe property structs, custom Codable
-- **Patterns:** Flattened JSON structure, immutable configuration, view modifier composition
-- **Components:** All 10+ built-in components and how to extend
-- **Rendering:** ComponentRenderer switch patterns, builder methods
-- **Testing:** Swift Testing framework patterns for property matching
-
-## Invoking Agents
-
-In Claude Code, agents are automatically suggested based on your task, or you can manually invoke:
-
-```
-Use the json-to-swiftui-expert agent to help me add a new component
-```
-
-The agent will have access to all tools and the full codebase context, plus specialized knowledge about this project's patterns and best practices.

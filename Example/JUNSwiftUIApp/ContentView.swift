@@ -12,14 +12,16 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @State private var showingJSONInput: Bool = false
     @State private var jsonInputText: String = ""
-    @State private var navigationPath = NavigationPath()
+    @State private var navigationPath: NavigationPath = NavigationPath()
 
+    /// Synced from the JUN repository by `Scripts/sync-examples.sh`.
     private let availableSamples: [String] = [
         "simple-layout",
-        "complex-layout",
+        "product-list",
         "horizontal-scroll",
         "remote-images",
-        "font-showcase"
+        "font-showcase",
+        "counter"
     ]
 
     var body: some View {
@@ -27,9 +29,9 @@ struct ContentView: View {
             List {
                 sampleSelectorView
             }
-            .navigationTitle("JSON → SwiftUI")
-            .navigationDestination(for: UIComponent.self) { component in
-                ComponentDetailView(component: component)
+            .navigationTitle("JUN → SwiftUI")
+            .navigationDestination(for: JUNDocument.self) { document in
+                DocumentDetailView(document: document)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -53,8 +55,8 @@ struct ContentView: View {
         Section {
             ForEach(availableSamples, id: \.self) { sample in
                 Button {
-                    if let component = loadSampleComponent(sample) {
-                        navigationPath.append(component)
+                    if let document = loadSample(sample) {
+                        navigationPath.append(document)
                     }
                 } label: {
                     HStack {
@@ -62,15 +64,15 @@ struct ContentView: View {
                             Text(formatSampleName(sample))
                                 .font(.headline)
 
-                            Text(getSampleDescription(sample))
+                            Text(description(of: sample))
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
 
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.tertiary)
                             .font(.caption)
                     }
                     .padding(.vertical, 8)
@@ -79,28 +81,25 @@ struct ContentView: View {
                 .buttonStyle(.plain)
             }
         } header: {
-            VStack {
-                Text("Select a Sample")
-                    .font(.title2)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Canonical JUN Examples")
+                    .font(.title3)
                     .fontWeight(.semibold)
-                    .padding(.top, 40)
 
-                Text("Choose a JSON sample to render as SwiftUI")
+                Text("The specification's own documents, rendered by JUNSwiftUI")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                    .foregroundStyle(.secondary)
             }
+            .textCase(nil)
+            .padding(.vertical, 8)
         }
 
         if let errorMessage {
             Text(errorMessage)
                 .font(.caption)
-                .foregroundColor(.red)
-                .padding()
+                .foregroundStyle(.red)
         }
     }
-
 
     // MARK: - JSON Input Sheet
 
@@ -108,7 +107,7 @@ struct ContentView: View {
     private var jsonInputSheet: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text("Paste your JSON here")
+                Text("Paste a JUN document")
                     .font(.headline)
                     .padding(.top)
 
@@ -116,26 +115,33 @@ struct ContentView: View {
                     .font(.system(.body, design: .monospaced))
                     .padding(8)
                     .background(Color(uiColor: .systemGray6))
-                    .cornerRadius(8)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .padding(.horizontal)
 
                 Button {
-                    if let component = loadFromString(jsonInputText) {
-                        navigationPath.append(component)
+                    if let document = loadFromString(jsonInputText) {
+                        navigationPath.append(document)
+                        showingJSONInput = false
+                        jsonInputText = ""
                     }
-                    showingJSONInput = false
-                    jsonInputText = ""
                 } label: {
                     Text("Render")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
-                        .cornerRadius(10)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
                 .padding(.horizontal)
                 .disabled(jsonInputText.isEmpty)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .padding(.horizontal)
+                }
 
                 Spacer()
             }
@@ -146,31 +152,27 @@ struct ContentView: View {
                     Button("Cancel") {
                         showingJSONInput = false
                         jsonInputText = ""
+                        errorMessage = nil
                     }
                 }
             }
         }
     }
 
-    // MARK: - Loading Functions
+    // MARK: - Loading
 
-    private func loadSampleComponent(_ sampleName: String) -> UIComponent? {
+    private func loadSample(_ name: String) -> JUNDocument? {
         errorMessage = nil
 
-        guard let url = Bundle.main.url(forResource: sampleName, withExtension: "json") else {
-            errorMessage = "Could not find sample '\(sampleName)' in app bundle"
-            return nil
-        }
-
         do {
-            return try JSONLoader.loadFromURL(url)
+            return try JSONLoader.loadFromBundle(filename: name)
         } catch {
-            errorMessage = "Failed to load sample: \(error.localizedDescription)"
+            errorMessage = "Failed to load '\(name)': \(error.localizedDescription)"
             return nil
         }
     }
 
-    private func loadFromString(_ jsonString: String) -> UIComponent? {
+    private func loadFromString(_ jsonString: String) -> JUNDocument? {
         errorMessage = nil
 
         do {
@@ -184,39 +186,99 @@ struct ContentView: View {
     // MARK: - Helpers
 
     private func formatSampleName(_ name: String) -> String {
-        return name
-            .replacingOccurrences(of: "-", with: " ")
-            .capitalized
+        name.replacingOccurrences(of: "-", with: " ").capitalized
     }
 
-    private func getSampleDescription(_ name: String) -> String {
+    private func description(of name: String) -> String {
         switch name {
         case "simple-layout":
-            return "Basic VStack, HStack, Text, Image, Button"
-        case "complex-layout":
-            return "Product list with nested layouts and ScrollView"
+            return "VStack, HStack, Text, shapes and a button"
+        case "product-list":
+            return "Scrollable catalog with nested cards"
         case "horizontal-scroll":
-            return "Horizontal ScrollView with remote images from URLs"
+            return "Horizontal gallery with remote images"
         case "remote-images":
-            return "AsyncImage loading from URLs with different layouts"
+            return "AsyncImage sizing, clipping and loading states"
         case "font-showcase":
-            return "Custom font examples with Helvetica, Courier, and Georgia"
+            return "The font property across several typefaces"
+        case "counter":
+            return "Actions with parameters, handled by this app"
         default:
-            return "JSON-to-SwiftUI example"
+            return "JUN document"
         }
     }
 }
 
-// MARK: - Component Detail View
+// MARK: - Document Detail View
 
-struct ComponentDetailView: View {
-    let component: UIComponent
+struct DocumentDetailView: View {
+    let document: JUNDocument
+
+    @State private var count: Int = 0
+    @State private var lastAction: String?
 
     var body: some View {
-        ComponentRenderer(component: component)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .navigationTitle("Rendered View")
-            .navigationBarTitleDisplayMode(.inline)
+        ScrollView {
+            VStack(spacing: 0) {
+                if !document.diagnostics.isEmpty {
+                    diagnosticsBanner
+                }
+
+                ComponentRenderer(document: document)
+                    .frame(maxWidth: .infinity)
+                    .junActionHandler(handle)
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let lastAction {
+                actionBanner(lastAction)
+            }
+        }
+        .navigationTitle("Rendered")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Interprets the actions the counter example names. A document can only name an intent —
+    /// this is where the app decides what it means.
+    private func handle(_ action: JUNAction) {
+        switch action.name {
+        case "adjustCount":
+            count += action.params["by"]?.intValue ?? 0
+        case "resetCount":
+            count = 0
+        default:
+            break
+        }
+
+        lastAction = "\(action.name)\(action.params.isEmpty ? "" : " \(action.params)") → count \(count)"
+    }
+
+    @ViewBuilder
+    private var diagnosticsBanner: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(
+                "\(document.diagnostics.count) diagnostic\(document.diagnostics.count == 1 ? "" : "s")",
+                systemImage: document.hasErrors ? "exclamationmark.triangle.fill" : "info.circle"
+            )
+            .font(.caption.weight(.semibold))
+
+            ForEach(Array(document.diagnostics.enumerated()), id: \.offset) { _, diagnostic in
+                Text(diagnostic.description)
+                    .font(.caption2.monospaced())
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(document.hasErrors ? Color.red.opacity(0.12) : Color.yellow.opacity(0.15))
+    }
+
+    @ViewBuilder
+    private func actionBanner(_ text: String) -> some View {
+        Text(text)
+            .font(.caption.monospaced())
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.thinMaterial)
     }
 }
 

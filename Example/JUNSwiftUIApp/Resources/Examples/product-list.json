@@ -1,7 +1,7 @@
 {
   "type": "scrollView",
   "properties": {
-    "scrollAxis": "vertical",
+    "axis": "vertical",
     "showsIndicators": true
   },
   "children": [
@@ -45,28 +45,13 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "properties": {
-                        "width": 80,
-                        "height": 80,
-                        "backgroundColor": "blue",
-                        "cornerRadius": 8
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "desktopcomputer",
-                        "foregroundColor": "white",
-                        "imageWidth": 40,
-                        "imageHeight": 40
-                      }
-                    }
-                  ]
+                  "type": "rectangle",
+                  "properties": {
+                    "width": 80,
+                    "height": 80,
+                    "backgroundColor": "blue",
+                    "cornerRadius": 8
+                  }
                 },
                 {
                   "type": "vstack",
@@ -104,13 +89,6 @@
                 },
                 {
                   "type": "spacer"
-                },
-                {
-                  "type": "image",
-                  "properties": {
-                    "imageName": "chevron.right",
-                    "foregroundColor": "gray"
-                  }
                 }
               ]
             },
@@ -124,28 +102,13 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "properties": {
-                        "width": 80,
-                        "height": 80,
-                        "backgroundColor": "purple",
-                        "cornerRadius": 8
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "iphone",
-                        "foregroundColor": "white",
-                        "imageWidth": 40,
-                        "imageHeight": 40
-                      }
-                    }
-                  ]
+                  "type": "rectangle",
+                  "properties": {
+                    "width": 80,
+                    "height": 80,
+                    "backgroundColor": "purple",
+                    "cornerRadius": 8
+                  }
                 },
                 {
                   "type": "vstack",
@@ -183,13 +146,6 @@
                 },
                 {
                   "type": "spacer"
-                },
-                {
-                  "type": "image",
-                  "properties": {
-                    "imageName": "chevron.right",
-                    "foregroundColor": "gray"
-                  }
                 }
               ]
             },
@@ -203,27 +159,12 @@
               },
               "children": [
                 {
-                  "type": "zstack",
-                  "properties": {},
-                  "children": [
-                    {
-                      "type": "circle",
-                      "properties": {
-                        "width": 80,
-                        "height": 80,
-                        "backgroundColor": "orange"
-                      }
-                    },
-                    {
-                      "type": "image",
-                      "properties": {
-                        "imageName": "applewatch",
-                        "foregroundColor": "white",
-                        "imageWidth": 40,
-                        "imageHeight": 40
-                      }
-                    }
-                  ]
+                  "type": "circle",
+                  "properties": {
+                    "width": 80,
+                    "height": 80,
+                    "backgroundColor": "orange"
+                  }
                 },
                 {
                   "type": "vstack",
@@ -261,13 +202,6 @@
                 },
                 {
                   "type": "spacer"
-                },
-                {
-                  "type": "image",
-                  "properties": {
-                    "imageName": "chevron.right",
-                    "foregroundColor": "gray"
-                  }
                 }
               ]
             }
@@ -285,7 +219,7 @@
             {
               "type": "button",
               "properties": {
-                "buttonLabel": "View All",
+                "label": "View All",
                 "backgroundColor": "blue",
                 "foregroundColor": "white",
                 "padding": 12,
@@ -295,7 +229,7 @@
             {
               "type": "button",
               "properties": {
-                "buttonLabel": "Cart",
+                "label": "Cart",
                 "backgroundColor": "#E5E5E5",
                 "foregroundColor": "black",
                 "padding": 12,

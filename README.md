@@ -4,313 +4,287 @@ SwiftUI implementation of the [JUN (JSON UI Notation)](https://github.com/ferchm
 
 **Platform**: iOS 17+ / macOS 14+
 **Language**: Swift 5.9+
+**Implements**: JUN v1.2
 **License**: MIT
 
 ---
 
 ## Overview
 
-JUNSwiftUI is a Swift Package that renders [JUN](https://github.com/ferchmin/JUN) JSON definitions as native SwiftUI views. It provides a type-safe, performant implementation using Swift's Codable and SwiftUI's declarative syntax.
+JUNSwiftUI renders [JUN](https://github.com/ferchmin/JUN) documents as native SwiftUI views. It
+is the reference implementation of the specification, and it is tested against the
+specification's own example documents on every commit.
 
 ## Features
 
-- ✅ Full JUN v1.0 specification compliance
-- ✅ Native SwiftUI rendering with @ViewBuilder
-- ✅ AsyncImage for remote URLs with loading states
-- ✅ Type-safe JSON parsing with Codable
-- ✅ Zero external dependencies
-- ✅ Comprehensive error handling
-- ✅ Example app with live samples
+- Complete JUN v1.2 support
+- Native SwiftUI rendering with `@ViewBuilder`
+- Remote, bundled and system images
+- Host-mediated actions with parameters
+- Diagnostics that say *where* a document is wrong, not just that it is
+- Bounded parsing for documents from untrusted sources
+- Zero external dependencies
 
 ## Installation
 
 ### Swift Package Manager
 
-Add to your `Package.swift`:
-
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ferchmin/JUNSwiftUI.git", from: "1.0.0")
+    .package(url: "https://github.com/ferchmin/JUNSwiftUI.git", from: "1.2.0")
 ]
 ```
 
-Or in Xcode:
-1. File → Add Package Dependencies
-2. Enter: `https://github.com/ferchmin/JUNSwiftUI`
-3. Select version and add to target
+Or in Xcode: **File → Add Package Dependencies**, then enter
+`https://github.com/ferchmin/JUNSwiftUI`.
 
 ## Quick Start
 
 ```swift
 import JUNSwiftUI
 
-struct ContentView: View {
+struct HomeView: View {
+    @State private var document: JUNDocument?
+
     var body: some View {
-        // Load from JSON string
-        if let component = try? JSONLoader.loadFromString("""
-        {
-          "type": "vstack",
-          "properties": {
-            "spacing": 20,
-            "padding": 16
-          },
-          "children": [
-            {
-              "type": "text",
-              "properties": {
-                "content": "Hello, JUN!",
-                "fontSize": 28,
-                "fontWeight": "bold",
-                "font": "Helvetica"
-              }
+        Group {
+            if let document {
+                ComponentRenderer(document: document)
+                    .junActionHandler { action in
+                        print("The document asked for \(action.name)")
+                    }
+            } else {
+                ProgressView()
             }
-          ]
         }
-        """) {
-            ComponentRenderer(component: component)
+        .task {
+            document = try? await JSONLoader.load(
+                from: URL(string: "https://api.example.com/ui/home")!
+            )
         }
     }
 }
 ```
 
-## Usage
+## Loading
 
-### Loading JSON
+| Source | API |
+|--------|-----|
+| Network | `try await JSONLoader.load(from: url)` |
+| String | `try JSONLoader.loadFromString(json)` |
+| Data | `try JSONLoader.loadFromData(data)` |
+| Bundle | `try JSONLoader.loadFromBundle(filename: "home")` |
+| Local file | `try JSONLoader.loadFromFile(fileURL)` |
 
-**From String:**
-```swift
-let component = try JSONLoader.loadFromString(jsonString)
-```
+Every loader returns a ``JUNDocument``: the component tree plus the diagnostics collected while
+parsing it.
 
-**From URL:**
-```swift
-let url = URL(string: "https://api.example.com/ui/home")!
-let component = try JSONLoader.loadFromURL(url)
-```
+`loadFromFile` rejects non-file URLs on purpose. Reading a remote URL synchronously blocks the
+calling thread — usually the main one — with no timeout and no cancellation, so remote
+documents go through the `async` loader instead.
 
-**From Bundle:**
-```swift
-let component = try JSONLoader.loadFromBundle(filename: "layout")
-```
+## Actions
 
-### Rendering
+A JUN document can only *name* an intent. Nothing happens unless the host application installs
+a handler and implements that name, which is what stops a document fetched from a server from
+being able to act on its own.
 
-```swift
-struct MyView: View {
-    let component: UIComponent
-
-    var body: some View {
-        ComponentRenderer(component: component)
-    }
-}
-```
-
-### Error Handling
-
-```swift
-do {
-    let component = try JSONLoader.loadFromString(jsonString)
-    ComponentRenderer(component: component)
-} catch {
-    Text("Failed to load UI: \(error.localizedDescription)")
-}
-```
-
-## Implementation Details
-
-### Component Mapping
-
-JUN components map to SwiftUI views:
-
-| JUN Type | SwiftUI View |
-|----------|--------------|
-| `vstack` | `VStack` |
-| `hstack` | `HStack` |
-| `zstack` | `ZStack` |
-| `scrollView` | `ScrollView` |
-| `text` | `Text` |
-| `image` | `AsyncImage` |
-| `button` | `Button` |
-| `rectangle` | `Rectangle` |
-| `circle` | `Circle` |
-| `spacer` | `Spacer` |
-| `divider` | `Divider` |
-
-### Property Mapping
-
-Universal properties apply SwiftUI modifiers:
-
-| JUN Property | SwiftUI Modifier |
-|--------------|------------------|
-| `padding` | `.padding(_)` |
-| `width`, `height` | `.frame(width:height:)` |
-| `maxWidth`, `maxHeight` | `.frame(maxWidth:maxHeight:)` |
-| `foregroundColor` | `.foregroundColor(_)` |
-| `backgroundColor` | `.background(_)` |
-| `cornerRadius` | `.cornerRadius(_)` |
-| `clipped` | `.clipped()` |
-| `aspectRatio` | `.aspectRatio(_:contentMode:)` |
-| `contentMode` | ContentMode parameter |
-| `font` | `.font(.custom(_))` |
-
-### ScrollView Clipping
-
-The `clipped` property has special behavior on ScrollView:
-- `clipped: true` or omitted → Default clipping
-- `clipped: false` → Applies `.scrollClipDisabled(true)`
-
-### Image Loading
-
-Images use SwiftUI's `AsyncImage`:
-- **Loading state**: Shows `ProgressView()`
-- **Success state**: Displays image with applied modifiers
-- **Failure state**: Shows placeholder icon
-- **Resizable**: Applies `.resizable()` when `resizable: true`
-
-### Color Parsing
-
-Supports:
-- **Named colors**: Maps to SwiftUI `Color` constants
-- **Hex colors**: Custom parser for `#RRGGBB` and `#RRGGBBAA` formats
-
-### Font Support
-
-The `font` property allows specifying custom fonts by name:
-- **System fonts**: "Helvetica", "Courier", "Georgia", etc.
-- **Custom fonts**: Register in app bundle and reference by PostScript name
-- **SF Pro variants**: "SFProDisplay-Regular", "SFProText-Bold", etc.
-
-Example:
 ```json
 {
-  "type": "text",
+  "type": "button",
   "properties": {
-    "content": "Custom Font Text",
-    "fontSize": 24,
-    "font": "Helvetica",
-    "foregroundColor": "blue"
+    "label": "Add to cart",
+    "action": { "name": "addToCart", "params": { "productId": "SKU-42", "quantity": 1 } }
   }
 }
 ```
 
-**Note**: Custom fonts must be registered in Info.plist under "Fonts provided by application" (UIAppFonts).
-
-## Project Structure
-
-```
-JUNSwiftUI/
-├── Sources/
-│   └── JUNSwiftUI/
-│       ├── Models/
-│       │   ├── UIComponent.swift          # Component model
-│       │   ├── ComponentProperties.swift  # Property definitions
-│       │   └── RootDocument.swift         # Data binding (future)
-│       ├── Views/
-│       │   ├── ComponentRenderer.swift    # Main renderer
-│       │   └── JSONToSwiftUIViewModel.swift
-│       └── Utilities/
-│           └── JSONLoader.swift           # JSON loading
-├── Tests/
-│   └── JUNSwiftUITests/
-├── Example/
-│   └── JUNSwiftUIApp/                     # Example iOS app
-└── Package.swift
+```swift
+ComponentRenderer(document: document)
+    .junActionHandler { action in
+        switch action.name {
+        case "addToCart":
+            cart.add(action.params["productId"]?.stringValue, quantity: action.params["quantity"]?.intValue ?? 1)
+        default:
+            break
+        }
+    }
 ```
 
-## Running the Example App
+`"action": "checkout"` is shorthand for `{"name": "checkout", "params": {}}`. Parameter values
+are JSON scalars: string, number, boolean or null.
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/ferchmin/JUNSwiftUI.git
-   cd JUNSwiftUI
-   ```
+Action names containing a dot are reserved by the specification for future standard actions.
+None are defined yet; they are delivered to your handler unchanged, and `JUNAction.isReserved`
+tells you when you have one.
 
-2. Open the example app:
-   ```bash
-   cd Example/JUNSwiftUIApp
-   open JUNSwiftUIApp.xcodeproj
-   ```
+## Diagnostics and strictness
 
-3. Build and run (⌘R)
+Parsing is lenient about anything that looks like a *newer* document and loud about anything
+that looks like a *broken* one. Those two cases pull in opposite directions, so they are
+handled separately:
 
-The example app includes:
-- Interactive sample browser
-- Live rendering of JUN definitions
-- JSON paste feature for testing
-- Multiple example layouts
-
-## API Reference
-
-### JSONLoader
+- **Unknown component types, unknown properties, unrecognised enum values** — degraded, with a
+  warning. A renderer that rejected a document for containing one unfamiliar component would
+  force every server-side addition to wait for an app release.
+- **Wrong value types, missing required properties** — the component still renders with
+  defaults, but an error diagnostic records what went wrong and where. A malformed component
+  never takes out its siblings.
 
 ```swift
-// Load component
-static func loadFromURL(_ url: URL) throws -> UIComponent
-static func loadFromString(_ jsonString: String) throws -> UIComponent
-static func loadFromBundle(filename: String, bundle: Bundle = .main) throws -> UIComponent
-static func loadFromData(_ data: Data) throws -> UIComponent
-```
+let document = try JSONLoader.loadFromString(json)
 
-### ComponentRenderer
-
-```swift
-public struct ComponentRenderer: View {
-    public init(component: UIComponent)
-    public var body: some View
+for diagnostic in document.diagnostics {
+    // error at children[3].properties.imageURL: expected String
+    analytics.record(diagnostic.description)
 }
 ```
 
-### Error Types
+Diagnostics are logged to `OSLog` automatically in debug builds. In release they travel on the
+document, so you can forward them to your telemetry — which is how the server that produced a
+broken document finds out, from the field, that it is broken.
+
+Use `JUNParseOptions.strict` in tests and build pipelines to turn any of it into a thrown
+error:
 
 ```swift
-public enum JSONLoaderError: LocalizedError {
-    case fileNotFound(String)
-    case invalidString
-    case decodingFailed(Error)
-}
+let document = try JSONLoader.loadFromData(data, options: .strict)
+```
+
+Parsing is bounded regardless of the policies: `maxDepth` (64) and `maxNodes` (10,000) reject a
+document outright, since those exist to protect against untrusted input.
+
+## Component mapping
+
+| JUN | SwiftUI |
+|-----|---------|
+| `vstack` / `hstack` / `zstack` | `VStack` / `HStack` / `ZStack` |
+| `scrollView` | `ScrollView` |
+| `text` | `Text` |
+| `image` | `AsyncImage`, `Image(_:)` or `Image(systemName:)` |
+| `button` | `Button` |
+| `rectangle` / `circle` | `Rectangle` / `Circle` |
+| `spacer` / `divider` | `Spacer` / `Divider` |
+
+### Property mapping
+
+| JUN | SwiftUI |
+|-----|---------|
+| `padding` | `.padding(_)`, applied inside `width`/`height` |
+| `width`, `height` | `.frame(width:height:)` |
+| `maxWidth`, `maxHeight` | `.frame(maxWidth:maxHeight:)`, composable with the above |
+| `foregroundColor` | `.foregroundStyle(_)`, or a shape's fill |
+| `backgroundColor` | `.background(_)`, or a shape's fill when no `foregroundColor` is given |
+| `cornerRadius` | `.clipShape(RoundedRectangle(...))` |
+| `clipped` | `.clipped()`, or `.scrollClipDisabled` on a ScrollView |
+| `aspectRatio`, `contentMode` | `.aspectRatio(_:contentMode:)` |
+| `font` | `.font(.custom(_:size:))` |
+
+Notes:
+
+- **Padding is internal.** `width: 100, padding: 16` occupies 100 points in total.
+- **Shapes are filled by `foregroundColor`**, falling back to `backgroundColor`. A shape given
+  only a background would otherwise paint it behind an opaque default fill and render black.
+- **`clipped: false` on a ScrollView** applies `.scrollClipDisabled(true)`.
+
+## Images
+
+Exactly one source is required:
+
+| Property | Resolves against | Rendered with |
+|----------|------------------|---------------|
+| `imageURL` | The document | `AsyncImage`, with loading and failure states |
+| `imageName` | Your asset catalogue | `Image(_:)` |
+| `systemImage` | The platform (SF Symbols) | `Image(systemName:)` |
+
+`imageName` and `systemImage` resolve against assets the document cannot ship, so a document
+that must render identically everywhere should prefer `imageURL`.
+
+## Fonts
+
+`font` names a family; unavailable names fall back to the system font. System faces such as
+Helvetica, Courier and Georgia work out of the box. Application-bundled fonts must be
+registered by the host — on iOS, under `UIAppFonts` in `Info.plist`.
+
+## Examples
+
+The example documents in this repository are the JUN repository's own, synced by
+`Scripts/sync-examples.sh` and checked for drift in CI. The test suite parses every one of them
+in strict mode, so "reference implementation" means something checkable.
+
+```bash
+./Scripts/sync-examples.sh          # refresh from upstream
+./Scripts/sync-examples.sh --check  # fail if they have drifted
+```
+
+## Running the example app
+
+```bash
+git clone https://github.com/ferchmin/JUNSwiftUI.git
+open JUNSwiftUI/Example/JUNSwiftUIApp.xcodeproj
+```
+
+Build and run (⌘R). The app browses the canonical examples, renders pasted JSON, shows any
+diagnostics a document produced, and handles the actions the counter example names.
+
+## Project structure
+
+```
+Sources/JUNSwiftUI/
+├── Models/
+│   ├── UIComponent.swift          # Component tree and its decoding
+│   ├── ComponentProperties.swift  # Per-type property structs
+│   ├── JUNAction.swift            # Action model
+│   └── JUNValue.swift             # Action parameter values
+├── Parsing/
+│   ├── JSONLoader.swift           # Entry points
+│   ├── JUNDocument.swift          # Tree + diagnostics
+│   ├── JUNDiagnostic.swift        # Problems, with locations
+│   ├── JUNParseOptions.swift      # Leniency policies and limits
+│   ├── JUNParseError.swift        # Whole-document failures
+│   └── JUNDecodingContext.swift   # Diagnostic collection during decode
+└── Views/
+    ├── ComponentRenderer.swift    # The renderer
+    ├── CommonModifiers.swift      # Universal properties
+    ├── JUNActionHandler.swift     # Host action dispatch
+    └── JUNColor.swift             # Color parsing
 ```
 
 ## Requirements
 
 - iOS 17.0+ or macOS 14.0+
-- Swift 5.9+
-- Xcode 15.0+
+- Swift 5.9+, Xcode 15.0+
 
-## Specification
+## Known limitations
 
-This implementation follows the [JUN v1.0 Specification](https://github.com/ferchmin/JUN/blob/main/spec/jun-spec.md).
-
-For complete format documentation, see the [JUN repository](https://github.com/ferchmin/JUN).
-
-## Known Limitations
-
-- Button actions only print to console (no custom handlers yet)
-- No navigation support (planned for v1.1)
-- No data binding or template variables (planned for v1.1)
-- No form input components (TextField, Picker, etc.)
+- No navigation, data binding, `forEach`, or form components. These are JUN roadmap items; see
+  the [specification](https://github.com/ferchmin/JUN/blob/main/spec/jun-spec.md).
+- No image caching beyond what `AsyncImage` provides, and placeholder views are not yet
+  configurable.
+- No theming: color names map to fixed SwiftUI colors.
+- Children on `button` are rendered as its label. This is an extension, not part of JUN v1.2 —
+  the parser emits a warning, and whether to change the specification or drop the capability is
+  undecided.
 
 ## Contributing
 
-Contributions welcome! Please ensure:
-- Code follows Swift style guidelines
-- Changes maintain JUN spec compliance
-- Tests pass
-- Example app works
+Specification changes belong in the [JUN repository](https://github.com/ferchmin/JUN) first —
+prose, schema and examples in one change — and land here afterwards. That ordering is not
+bureaucracy: the v1.1 schema shipped without the property v1.1 was released for, precisely
+because it was written the other way round.
 
-## Related Projects
+For changes here: keep the tests passing, keep `swiftlint --strict` clean, and add coverage for
+what you changed.
 
-- **[JUN Specification](https://github.com/ferchmin/JUN)** - Main specification repo
-- **JUNReact** - React implementation (coming soon)
-- **JUNAndroid** - Android/Compose implementation (coming soon)
+## Related projects
+
+- **[JUN Specification](https://github.com/ferchmin/JUN)** — the format
+- **JUNReact**, **JUNAndroid** — not yet written
 
 ## License
 
-MIT License - See [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
 
 ## Author
 
 Pawel Zgoda-Ferchmin
-
----
-
-Part of the **JUN** ecosystem - [JUN Specification](https://github.com/ferchmin/JUN)

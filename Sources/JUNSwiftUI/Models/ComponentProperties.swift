@@ -1,8 +1,12 @@
 import Foundation
 import SwiftUI
 
-/// Type-safe properties for each component type
-enum ComponentProperties: Codable, Equatable {
+/// Type-safe properties for each component type.
+///
+/// Encoding only. Components are decoded through ``UIComponent``, which reads the `type`
+/// string first and then decodes the matching property struct from the flat `properties`
+/// object — the synthesised enum decoding would expect a quite different shape.
+enum ComponentProperties: Encodable, Equatable, Sendable {
     case layout(LayoutProperties)
     case text(TextProperties)
     case image(ImageProperties)
@@ -12,7 +16,14 @@ enum ComponentProperties: Codable, Equatable {
     case spacer
     case divider
 
-    /// Returns the type string for JSON encoding
+    /// A component type this version of the renderer does not know.
+    ///
+    /// Reaching the renderer at all means the caller asked for
+    /// ``JUNParseOptions/UnknownComponentPolicy/placeholder``; under the default `.skip`
+    /// policy these are dropped during decoding.
+    case unknown(String)
+
+    /// Returns the type string for JSON encoding.
     var typeString: String {
         switch self {
         case .layout(let props):
@@ -32,13 +43,48 @@ enum ComponentProperties: Codable, Equatable {
         case .scrollView: return "scrollView"
         case .spacer: return "spacer"
         case .divider: return "divider"
+        case .unknown(let typeString): return typeString
+        }
+    }
+
+    /// Whether this component renders children at all.
+    var acceptsChildren: Bool {
+        switch self {
+        case .layout, .scrollView, .unknown: return true
+        case .button: return true  // Non-standard; see `childrenAreNonStandard`.
+        case .text, .image, .shape, .spacer, .divider: return false
+        }
+    }
+
+    /// Whether accepting children here is an extension rather than specified behaviour.
+    ///
+    /// JUN v1.2 forbids children on `button`, but JUNSwiftUI has always rendered them as the
+    /// button's label. Whether to change the specification or drop the capability is an open
+    /// question, so the behaviour is preserved and the divergence is reported instead of being
+    /// silently either way.
+    var childrenAreNonStandard: Bool {
+        if case .button = self { return true }
+        return false
+    }
+
+    /// Encodes the associated property struct flatly, producing the `properties` object the
+    /// specification describes rather than Swift's synthesised enum representation.
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case .layout(let props): try props.encode(to: encoder)
+        case .text(let props): try props.encode(to: encoder)
+        case .image(let props): try props.encode(to: encoder)
+        case .button(let props): try props.encode(to: encoder)
+        case .shape(let props): try props.encode(to: encoder)
+        case .scrollView(let props): try props.encode(to: encoder)
+        case .spacer, .divider, .unknown: try CommonProperties().encode(to: encoder)
         }
     }
 }
 
 // MARK: - Layout Properties (VStack, HStack, ZStack)
 
-struct LayoutProperties: Codable, Equatable {
+struct LayoutProperties: Codable, Equatable, Sendable {
     let layoutType: LayoutType
     let spacing: CGFloat?
     let alignment: String?
@@ -56,17 +102,17 @@ struct LayoutProperties: Codable, Equatable {
         self.common = common
     }
 
-    // Custom decoding to flatten common properties from JSON
     init(from decoder: Decoder, layoutType: LayoutType) throws {
+        let context: JUNDecodingContext = decoder.junContext
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+
         self.layoutType = layoutType
-        self.spacing = try? container.decode(CGFloat.self, forKey: .spacing)
-        self.alignment = try? container.decode(String.self, forKey: .alignment)
+        self.spacing = try container.junDecode(CGFloat.self, forKey: .spacing, context)
+        self.alignment = try container.junDecode(String.self, forKey: .alignment, context)
         self.common = try CommonProperties(from: decoder)
     }
 
     init(from decoder: Decoder) throws {
-        // Fallback if called without layoutType
         try self.init(from: decoder, layoutType: .vstack)
     }
 
@@ -82,7 +128,7 @@ struct LayoutProperties: Codable, Equatable {
     }
 }
 
-enum LayoutType: Equatable {
+enum LayoutType: Equatable, Sendable {
     case vstack
     case hstack
     case zstack
@@ -90,7 +136,7 @@ enum LayoutType: Equatable {
 
 // MARK: - Text Properties
 
-struct TextProperties: Codable, Equatable {
+struct TextProperties: Codable, Equatable, Sendable {
     let content: String
     let fontSize: CGFloat?
     let fontWeight: String?
@@ -109,10 +155,12 @@ struct TextProperties: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
+        let context: JUNDecodingContext = decoder.junContext
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
-        self.content = (try? container.decode(String.self, forKey: .content)) ?? ""
-        self.fontSize = try? container.decode(CGFloat.self, forKey: .fontSize)
-        self.fontWeight = try? container.decode(String.self, forKey: .fontWeight)
+
+        self.content = try container.junDecodeRequired(String.self, forKey: .content, context) ?? ""
+        self.fontSize = try container.junDecode(CGFloat.self, forKey: .fontSize, context)
+        self.fontWeight = try container.junDecode(String.self, forKey: .fontWeight, context)
         self.common = try CommonProperties(from: decoder)
     }
 
@@ -131,50 +179,111 @@ struct TextProperties: Codable, Equatable {
 
 // MARK: - Image Properties
 
-struct ImageProperties: Codable, Equatable {
-    let imageURL: String?
+/// Where an image comes from.
+///
+/// The three sources differ in who owns the asset, which is why they are distinct properties
+/// rather than one overloaded string: `url` ships with the document, `name` belongs to the
+/// host application, and `system` belongs to the platform.
+enum ImageSource: Equatable, Sendable {
+    case url(String)
+    case name(String)
+    case system(String)
+}
+
+struct ImageProperties: Codable, Equatable, Sendable {
+    let source: ImageSource?
     let resizable: Bool?
     let common: CommonProperties
 
     init(
-        imageURL: String? = nil,
+        source: ImageSource? = nil,
         resizable: Bool? = nil,
         common: CommonProperties = CommonProperties()
     ) {
-        self.imageURL = imageURL
+        self.source = source
         self.resizable = resizable
         self.common = common
     }
 
     init(from decoder: Decoder) throws {
+        let context: JUNDecodingContext = decoder.junContext
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
-        self.imageURL = try? container.decode(String.self, forKey: .imageURL)
-        self.resizable = try? container.decode(Bool.self, forKey: .resizable)
+
+        let imageURL: String? = try container.junDecode(String.self, forKey: .imageURL, context)
+        let imageName: String? = try container.junDecode(String.self, forKey: .imageName, context)
+        let systemImage: String? = try container.junDecode(String.self, forKey: .systemImage, context)
+
+        let provided: [ImageSource] = [
+            imageURL.map(ImageSource.url),
+            imageName.map(ImageSource.name),
+            systemImage.map(ImageSource.system)
+        ].compactMap { $0 }
+
+        switch provided.count {
+        case 1:
+            self.source = provided[0]
+
+        case 0:
+            context.fail(
+                "image requires one of 'imageURL', 'imageName' or 'systemImage'",
+                at: decoder.codingPath
+            )
+            if context.options.invalidValues == .fail {
+                throw JUNParseError.invalidValue(
+                    path: JUNPath.describe(decoder.codingPath),
+                    message: "image has no source"
+                )
+            }
+            self.source = nil
+
+        default:
+            // Ambiguous rather than absent: render something, but say so.
+            context.fail(
+                "image specifies more than one source; using the first of imageURL, imageName, systemImage",
+                at: decoder.codingPath
+            )
+            if context.options.invalidValues == .fail {
+                throw JUNParseError.invalidValue(
+                    path: JUNPath.describe(decoder.codingPath),
+                    message: "image has \(provided.count) sources, expected exactly one"
+                )
+            }
+            self.source = provided[0]
+        }
+
+        self.resizable = try container.junDecode(Bool.self, forKey: .resizable, context)
         self.common = try CommonProperties(from: decoder)
     }
 
     func encode(to encoder: Encoder) throws {
         var container: KeyedEncodingContainer<CodingKeys> = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(imageURL, forKey: .imageURL)
+
+        switch source {
+        case .url(let value): try container.encode(value, forKey: .imageURL)
+        case .name(let value): try container.encode(value, forKey: .imageName)
+        case .system(let value): try container.encode(value, forKey: .systemImage)
+        case nil: break
+        }
+
         try container.encodeIfPresent(resizable, forKey: .resizable)
         try common.encode(to: encoder)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case imageURL, resizable
+        case imageURL, imageName, systemImage, resizable
     }
 }
 
 // MARK: - Button Properties
 
-struct ButtonProperties: Codable, Equatable {
+struct ButtonProperties: Codable, Equatable, Sendable {
     let label: String
-    let action: String?
+    let action: JUNAction?
     let common: CommonProperties
 
     init(
         label: String,
-        action: String? = nil,
+        action: JUNAction? = nil,
         common: CommonProperties = CommonProperties()
     ) {
         self.label = label
@@ -183,14 +292,11 @@ struct ButtonProperties: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
+        let context: JUNDecodingContext = decoder.junContext
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
-        // Try "label" first, fall back to legacy "buttonLabel"
-        self.label = (try? container.decode(String.self, forKey: .label))
-            ?? (try? container.decode(String.self, forKey: .buttonLabel))
-            ?? "Button"
-        // Try "action" first, fall back to legacy "buttonAction"
-        self.action = (try? container.decode(String.self, forKey: .action))
-            ?? (try? container.decode(String.self, forKey: .buttonAction))
+
+        self.label = try container.junDecodeRequired(String.self, forKey: .label, context) ?? "Button"
+        self.action = try container.junDecode(JUNAction.self, forKey: .action, context)
         self.common = try CommonProperties(from: decoder)
     }
 
@@ -202,13 +308,13 @@ struct ButtonProperties: Codable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case label, action, buttonLabel, buttonAction
+        case label, action
     }
 }
 
 // MARK: - Shape Properties
 
-struct ShapeProperties: Codable, Equatable {
+struct ShapeProperties: Codable, Equatable, Sendable {
     let shapeType: ShapeType
     let common: CommonProperties
 
@@ -226,7 +332,6 @@ struct ShapeProperties: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        // Fallback if called without shapeType
         try self.init(from: decoder, shapeType: .rectangle)
     }
 
@@ -235,14 +340,14 @@ struct ShapeProperties: Codable, Equatable {
     }
 }
 
-enum ShapeType: Equatable {
+enum ShapeType: Equatable, Sendable {
     case rectangle
     case circle
 }
 
 // MARK: - ScrollView Properties
 
-struct ScrollViewProperties: Codable, Equatable {
+struct ScrollViewProperties: Codable, Equatable, Sendable {
     let axis: String?
     let showsIndicators: Bool?
     let common: CommonProperties
@@ -258,11 +363,11 @@ struct ScrollViewProperties: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
+        let context: JUNDecodingContext = decoder.junContext
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
-        // Try "axis" first, fall back to legacy "scrollAxis"
-        self.axis = (try? container.decode(String.self, forKey: .axis))
-            ?? (try? container.decode(String.self, forKey: .scrollAxis))
-        self.showsIndicators = try? container.decode(Bool.self, forKey: .showsIndicators)
+
+        self.axis = try container.junDecode(String.self, forKey: .axis, context)
+        self.showsIndicators = try container.junDecode(Bool.self, forKey: .showsIndicators, context)
         self.common = try CommonProperties(from: decoder)
     }
 
@@ -274,13 +379,13 @@ struct ScrollViewProperties: Codable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case axis, showsIndicators, scrollAxis
+        case axis, showsIndicators
     }
 }
 
 // MARK: - Common Properties (applicable to all components)
 
-struct CommonProperties: Codable, Equatable {
+struct CommonProperties: Codable, Equatable, Sendable {
     let padding: CGFloat?
     let width: CGFloat?
     let height: CGFloat?
@@ -321,6 +426,30 @@ struct CommonProperties: Codable, Equatable {
         self.contentMode = contentMode
         self.font = font
     }
+
+    init(from decoder: Decoder) throws {
+        let context: JUNDecodingContext = decoder.junContext
+        let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.padding = try container.junDecode(CGFloat.self, forKey: .padding, context)
+        self.width = try container.junDecode(CGFloat.self, forKey: .width, context)
+        self.height = try container.junDecode(CGFloat.self, forKey: .height, context)
+        self.maxWidth = try container.junDecode(CGFloat.self, forKey: .maxWidth, context)
+        self.maxHeight = try container.junDecode(CGFloat.self, forKey: .maxHeight, context)
+        self.foregroundColor = try container.junDecode(String.self, forKey: .foregroundColor, context)
+        self.backgroundColor = try container.junDecode(String.self, forKey: .backgroundColor, context)
+        self.cornerRadius = try container.junDecode(CGFloat.self, forKey: .cornerRadius, context)
+        self.clipped = try container.junDecode(Bool.self, forKey: .clipped, context)
+        self.aspectRatio = try container.junDecode(CGFloat.self, forKey: .aspectRatio, context)
+        self.contentMode = try container.junDecode(String.self, forKey: .contentMode, context)
+        self.font = try container.junDecode(String.self, forKey: .font, context)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case padding, width, height, maxWidth, maxHeight
+        case foregroundColor, backgroundColor, cornerRadius, clipped
+        case aspectRatio, contentMode, font
+    }
 }
 
 // MARK: - Convenience Accessors
@@ -334,7 +463,7 @@ extension ComponentProperties {
         case .button(let props): return props.common
         case .shape(let props): return props.common
         case .scrollView(let props): return props.common
-        case .spacer, .divider: return CommonProperties()
+        case .spacer, .divider, .unknown: return CommonProperties()
         }
     }
 }

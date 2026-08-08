@@ -1,0 +1,49 @@
+included:
+  - Sources
+  - Tests
+  - Example/JUNSwiftUIApp
+
+excluded:
+  - .build
+  - Example/JUNSwiftUIApp/Resources
+
+disabled_rules:
+  # The renderer is one switch over the component types; splitting it to satisfy a length
+  # rule would make it harder to read, not easier.
+  - type_body_length
+  - file_length
+  # Explicit types on lets are a deliberate convention in this codebase.
+  - redundant_type_annotation
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - last_where
+  - sorted_first_last
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: false
+  ignores_urls: true
+
+function_body_length:
+  warning: 80
+  error: 120
+
+cyclomatic_complexity:
+  warning: 20
+  error: 30
+
+identifier_name:
+  min_length: 2
+  excluded:
+    - id
+    - by
+    - to
+
+nesting:
+  type_level: 2

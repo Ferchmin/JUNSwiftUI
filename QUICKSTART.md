@@ -1,267 +1,191 @@
-# Quick Start Guide
+# Quick Start
 
 ## Prerequisites
 
-- Xcode 15.0 or later
-- macOS 14.0 or later (for development)
-- iOS 17.0 or later (for deployment)
+- Xcode 15.0+
+- macOS 14.0+ to develop, iOS 17.0+ or macOS 14.0+ to deploy
 - Swift 5.9+
 
-## Opening the Project
-
-### Option 1: Open in Xcode (Recommended)
+## Get the code
 
 ```bash
-cd /Users/pawel/JSONToSwiftUIPOC
-open Package.swift
+git clone https://github.com/ferchmin/JUNSwiftUI.git
+cd JUNSwiftUI
 ```
 
-Xcode will automatically resolve dependencies and prepare the project.
-
-### Option 2: Command Line
+## Build and test the package
 
 ```bash
-cd /Users/pawel/JSONToSwiftUIPOC
-
-# Build the project
 swift build
-
-# Run tests
 swift test
-
-# Run the app (macOS only via command line)
-swift run JSONToSwiftUIApp
 ```
 
-## Running the App
+Or open `Package.swift` in Xcode and press ⌘U.
 
-### On iOS Simulator
+## Run the example app
 
-1. Open `Package.swift` in Xcode
-2. Select `JSONToSwiftUIApp` scheme
-3. Choose an iOS simulator (iPhone 15 or later recommended)
-4. Press ⌘R to build and run
+```bash
+open Example/JUNSwiftUIApp.xcodeproj
+```
 
-### On macOS
+Select the `JUNSwiftUIApp` scheme and press ⌘R. The app:
 
-1. Open `Package.swift` in Xcode
-2. Select `JSONToSwiftUIApp` scheme
-3. Choose "My Mac" as the destination
-4. Press ⌘R to build and run
+- browses the canonical JUN examples
+- renders JSON you paste into it
+- shows any diagnostics a document produced
+- handles the actions the counter example names
 
-## Exploring Sample Layouts
+There is no `swift run` target — the package is a library, and the example is an Xcode app.
 
-The app comes with three pre-built samples:
+## Render your first document
 
-1. **Simple Layout** - Basic components: VStack, HStack, Text, Image, Button
-2. **Complex Layout** - Product list with nested layouts, ZStack, ScrollView
-3. **Horizontal Scroll** - Horizontal scrolling gallery with shapes
+```swift
+import SwiftUI
+import JUNSwiftUI
 
-### Viewing a Sample
-
-1. Launch the app
-2. The first sample loads automatically
-3. Tap "Back" to return to sample selection
-4. Tap any sample to view it
-
-### Loading Custom JSON
-
-1. Tap the menu icon (⋯) in the top-right
-2. Select "Paste JSON"
-3. Paste your JSON definition
-4. Tap "Render"
-
-## Testing Custom JSON
-
-### Example: Create a Simple Card
-
-```json
-{
-  "type": "vstack",
-  "properties": {
-    "spacing": 12,
-    "padding": 16,
-    "backgroundColor": "#F0F0F0",
-    "cornerRadius": 12
-  },
-  "children": [
+struct DemoView: View {
+    private static let json: String = """
     {
-      "type": "text",
-      "properties": {
-        "content": "Hello, SwiftUI!",
-        "fontSize": 24,
-        "fontWeight": "bold"
-      }
-    },
-    {
-      "type": "text",
-      "properties": {
-        "content": "This card was generated from JSON",
-        "fontSize": 14,
-        "foregroundColor": "gray"
-      }
-    },
-    {
-      "type": "button",
-      "properties": {
-        "buttonLabel": "Tap Me",
-        "backgroundColor": "blue",
-        "foregroundColor": "white",
-        "padding": 12,
-        "cornerRadius": 8
-      }
+      "type": "vstack",
+      "properties": { "spacing": 12, "padding": 16 },
+      "children": [
+        { "type": "text", "properties": { "content": "Hello, JUN!", "fontSize": 28, "fontWeight": "bold" } },
+        { "type": "text", "properties": { "content": "Rendered from JSON", "fontSize": 14, "foregroundColor": "gray" } },
+        { "type": "button", "properties": {
+            "label": "Tap me",
+            "action": "sayHello",
+            "backgroundColor": "blue",
+            "foregroundColor": "white",
+            "padding": 12,
+            "cornerRadius": 8
+        }}
+      ]
     }
-  ]
+    """
+
+    var body: some View {
+        if let document = try? JSONLoader.loadFromString(Self.json) {
+            ComponentRenderer(document: document)
+                .junActionHandler { action in
+                    print("Document asked for: \(action.name)")
+                }
+        }
+    }
 }
 ```
 
-1. Copy the JSON above
-2. In the app, tap menu (⋯) → "Paste JSON"
-3. Paste and tap "Render"
+Paste the same JSON into the example app's **Paste JSON** sheet to see it without writing any
+Swift.
 
-## Modifying Sample JSON
+## Common patterns
 
-Sample JSON files are located in:
-```
-Resources/SampleJSON/
-├── simple-layout.json
-├── complex-layout.json
-└── horizontal-scroll.json
-```
-
-Edit these files to experiment with different layouts:
-
-```bash
-# Open a sample in your editor
-open Resources/SampleJSON/simple-layout.json
-
-# Edit the JSON
-# Save the file
-# Rebuild and run the app to see changes
-```
-
-## Running Tests
-
-### In Xcode
-
-1. Press ⌘U to run all tests
-2. View results in the Test Navigator (⌘6)
-
-### Command Line
-
-```bash
-swift test
-```
-
-Expected output:
-```
-Test Suite 'All tests' passed
-Test run with 3 tests in 1 suite passed
-```
-
-## Common JSON Patterns
-
-### VStack with Multiple Children
+### A stack of text
 
 ```json
 {
   "type": "vstack",
-  "properties": {
-    "spacing": 10,
-    "alignment": "center"
-  },
+  "properties": { "spacing": 10, "alignment": "leading" },
   "children": [
     { "type": "text", "properties": { "content": "Item 1" } },
-    { "type": "text", "properties": { "content": "Item 2" } },
-    { "type": "text", "properties": { "content": "Item 3" } }
+    { "type": "text", "properties": { "content": "Item 2" } }
   ]
 }
 ```
 
-### HStack with Images and Text
+### An icon beside a label
 
 ```json
 {
   "type": "hstack",
-  "properties": {
-    "spacing": 12
-  },
+  "properties": { "spacing": 8 },
   "children": [
-    {
-      "type": "image",
-      "properties": {
-        "imageName": "star.fill",
-        "foregroundColor": "yellow"
-      }
-    },
-    {
-      "type": "text",
-      "properties": {
-        "content": "Featured",
-        "fontWeight": "semibold"
-      }
-    }
+    { "type": "image", "properties": { "systemImage": "star.fill", "foregroundColor": "yellow", "width": 20, "height": 20 } },
+    { "type": "text", "properties": { "content": "Featured", "fontWeight": "semibold" } }
   ]
 }
 ```
 
-### ScrollView with Vertical Content
+### A remote image
+
+```json
+{
+  "type": "image",
+  "properties": {
+    "imageURL": "https://picsum.photos/400/250",
+    "resizable": true,
+    "contentMode": "fill",
+    "width": 400,
+    "height": 250,
+    "cornerRadius": 12,
+    "clipped": true
+  }
+}
+```
+
+### A horizontal scroller
 
 ```json
 {
   "type": "scrollView",
-  "properties": {
-    "scrollAxis": "vertical"
-  },
+  "properties": { "axis": "horizontal", "showsIndicators": false },
   "children": [
-    {
-      "type": "vstack",
-      "properties": {
-        "spacing": 20
-      },
-      "children": [
-        // Add many items here for scrolling
-      ]
-    }
+    { "type": "hstack", "properties": { "spacing": 12 }, "children": [] }
   ]
 }
 ```
 
-## Troubleshooting
+## Loading from a server
 
-### Build Errors
+```swift
+let document = try await JSONLoader.load(from: URL(string: "https://api.example.com/ui/home")!)
+```
 
-**Error**: `'Observable()' is only available in macOS 14.0 or newer`
-- **Solution**: Update your macOS to 14.0+ or change deployment target
+Use the `async` loader for anything remote. `loadFromFile` refuses non-file URLs, because
+reading one synchronously blocks the calling thread with no timeout and no cancellation.
 
-**Error**: Module 'JSONToSwiftUIPOCLib' not found
-- **Solution**: Clean build folder (⌘⇧K) and rebuild (⌘B)
+## When a document does not render
 
-### Runtime Issues
+Every loader returns a `JUNDocument` carrying the problems found while parsing it:
 
-**JSON doesn't render**
-- Check Xcode console for error messages
-- Verify JSON syntax is valid (use a JSON validator)
-- Ensure all required properties are present
+```swift
+let document = try JSONLoader.loadFromString(json)
 
-**Colors not showing**
-- Verify color names are correct (red, blue, green, etc.)
-- For hex colors, include the `#` prefix: "#FF5733"
+for diagnostic in document.diagnostics {
+    print(diagnostic)   // error at children[3].properties.imageURL: expected String
+}
+```
 
-**Images not appearing**
-- For SF Symbols, verify the symbol name is correct
-- For remote images, check the URL is valid and accessible
+Diagnostics also go to `OSLog` in debug builds — filter the console on the `com.jun.swiftui`
+subsystem. The example app displays them above the rendered document.
 
-## Next Steps
+| Symptom | Likely cause |
+|---------|--------------|
+| A component is missing entirely | An unknown `type`. Look for a warning diagnostic naming it |
+| A property seems ignored | Wrong JSON type. Look for an error diagnostic naming the property |
+| A shape is the wrong color | `foregroundColor` is the fill; `backgroundColor` is only a fallback |
+| A sized component is too big | `padding` is inside `width`/`height`, so check both |
+| An image shows a placeholder | Exactly one of `imageURL`, `imageName`, `systemImage` is required |
+| A button does nothing | No `junActionHandler` is installed, or none of its cases match the name |
+| Loading throws immediately | `maxDepth` or `maxNodes` exceeded — see `JUNParseOptions` |
 
-1. **Read the full README.md** for complete documentation
-2. **Experiment with JSON** - Create your own layouts
-3. **Add new components** - Extend ComponentRenderer.swift
-4. **Integrate with LLM** - Use with Claude or GPT to generate UIs
+To turn any of these into a thrown error rather than a diagnostic, parse with
+`options: .strict`.
 
-## Getting Help
+## Editing the examples
 
-- Check `README.md` for full documentation
-- Review sample JSON in `Resources/SampleJSON/`
-- Examine `ComponentRenderer.swift` to see available properties
-- Run tests to verify functionality: `swift test`
+The example documents come from the [JUN repository](https://github.com/ferchmin/JUN) and are
+synced into `Example/JUNSwiftUIApp/Resources/Examples/`:
+
+```bash
+./Scripts/sync-examples.sh          # refresh from upstream
+./Scripts/sync-examples.sh --check  # fail if they have drifted
+```
+
+Edit them upstream rather than here — CI fails on drift, which is what stops the copies from
+diverging.
+
+## Next steps
+
+- [README.md](README.md) for the full API
+- [JUN specification](https://github.com/ferchmin/JUN/blob/main/spec/jun-spec.md) for the format
+- `Sources/JUNSwiftUI/Views/ComponentRenderer.swift` to see how components map to SwiftUI
