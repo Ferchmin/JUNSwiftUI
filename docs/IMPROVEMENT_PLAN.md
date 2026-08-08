@@ -401,18 +401,220 @@ attached. Landing it as one PR — plus item 13 (CI) pulled forward so the PR it
 verified — gets the project from "cannot be installed and renders three samples wrong" to
 "works as advertised", which is the precondition for everything else.
 
-## 5. Decisions needed from the maintainer
+## 5. Decisions — resolved 2026-08-08
 
-These change what gets built and are not mine to settle:
+| # | Decision | Resolution | Consequence |
+|---|---|---|---|
+| 1 | Local images | **Implement** | New JUN property; spec + schema change lands in JUN first |
+| 2 | Button children | **Deferred** | Stays a known divergence; documented, not resolved |
+| 3 | Legacy aliases | **Remove now**, no deprecation cycle | Must land *before* the first tag — see §5.1 |
+| 4 | Action model | See **Appendix A** — proposal awaiting ratification | Spec change; gates Phase 3 item 19 |
+| 5 | Example sharing | **Share** | JUN becomes upstream for all examples — see §5.2 |
+| 6 | Strictness | See **Appendix B** — proposal awaiting ratification | Changes the loader's return type; must precede the first tag |
 
-1. **`imageName`/local images** — add to the spec, or drop from the samples?
-2. **Button children** — extend the spec to allow them (matching the implementation), or
-   remove the capability from JUNSwiftUI?
-3. **Legacy aliases** — deprecate-then-remove at 2.0, or remove now while adoption is near
-   zero?
-4. **Action model** — opaque identifier string, or a structured `{name, payload}` object?
-   This is the highest-leverage spec decision on the list.
-5. **Example sharing** — should JUNSwiftUI consume the JUN repo's examples directly (submodule
-   or sync script), accepting the coupling in exchange for guaranteed conformance?
-6. **Strictness default** — lenient-with-diagnostics (current behaviour, better reported) or
-   strict-by-default with an opt-out?
+### 5.1 Sequencing consequence of decisions 3 and 6
+
+Both are breaking changes, and Phase 0 item 5 tags `1.1.0`. Tagging first would make each of
+them a breaking change against a released version — which is precisely the situation the
+"no 2.0 needed" decision is trying to avoid. **Move the legacy-alias removal (and, if
+Appendix B is accepted, the loader signature change) into Phase 0, ahead of the tag.** With
+no tags in existence today, both are free right now and expensive in a week.
+
+Revised Phase 0 ordering:
+
+1. Fix the invalid JSON (P0-2), shape fill (P0-3), POC deletion (P0-5), schema `font` (P1-1).
+2. Remove `buttonLabel` / `buttonAction` / `scrollAxis` from the decoder; migrate every
+   sample and doc snippet onto `label` / `action` / `axis`, and `imageWidth` / `imageHeight`
+   onto `width` / `height` (P1-2).
+3. Land the loader/diagnostics shape if Appendix B is accepted.
+4. *Then* tag `1.1.0` and fix the README install snippet (P0-1).
+
+### 5.2 What "share the examples" actually means
+
+The two example sets are not siblings — they are the same documents at different ages:
+
+| JUN | JUNSwiftUI | Status |
+|---|---|---|
+| `examples/simple-layout` | `simple-layout` | Same doc; JUN's is clean, JUNSwiftUI's uses the legacy dialect and older copy |
+| `examples/product-list` | `complex-layout` | **Same document under two names**; JUN's is clean |
+| `examples/horizontal-scroll` | `horizontal-scroll` | Same doc; JUNSwiftUI's is the broken copy (P0-2) |
+| — | `remote-images` | Only in JUNSwiftUI; needs contributing upstream |
+| — | `font-showcase` | Only in JUNSwiftUI; needs contributing upstream |
+| `examples/counter` (README link) | — | Referenced but never written |
+
+All three JUN examples validate cleanly against the schema; three of five JUNSwiftUI samples
+do not. So the sync direction is not a coin flip — **JUN is already the corrected upstream**,
+and adopting it deletes three of the four sample defects as a side effect.
+
+Work involved:
+
+1. Contribute `remote-images` and `font-showcase` to `JUN/examples/` in the repo's
+   `<name>/screen.json` + `README.md` convention.
+2. Rename JUNSwiftUI's `complex-layout` to `product-list` to match upstream.
+3. Delete both JUNSwiftUI sample directories; replace with a synced copy.
+4. Either write `examples/counter` or drop the dead README link (P2-9).
+
+**Mechanism: a sync script plus a committed copy plus a CI drift check — not a submodule.**
+A submodule inside the package repo gets fetched by every SPM consumer, and test resources
+need the files physically present anyway. `Scripts/sync-examples.sh` pulls from a pinned JUN
+tag into `Examples/`, and CI fails if the working copy differs from a fresh sync. Same
+guarantee, none of the submodule cost, and the package stays self-contained.
+
+---
+
+## Appendix A — Action model (proposal)
+
+**Question:** is `action` an opaque identifier string, or a structured object?
+
+### The three real options
+
+**A · Opaque string.** `"action": "checkout"`. What the spec says today. Simplest possible
+thing, and fully host-mediated — a document can only *name* an intent the app already
+implements. But it carries no data, so a product list cannot express "add item 42 to cart"
+without encoding parameters into the string (`"addToCart:42"`), which is a private dialect
+waiting to happen — the exact failure mode as `buttonLabel`. Server-driven UI is precisely
+the case that needs parameters.
+
+**B · Structured object.** `{"name": "addToCart", "params": {"productId": "42"}}`. Carries a
+payload, still fully host-mediated, JSON-native. Costs a decision about what `params` values
+may be, and a small value type in Swift.
+
+**C · Spec-defined verbs.** The spec defines standard actions with mandated cross-platform
+semantics — `openURL`, `navigate`, `dismiss` — plus a custom escape hatch. The only option
+that makes *interaction* portable rather than just layout, and it is where the v1.2
+navigation roadmap item inevitably leads.
+
+### Recommendation: B now, shaped so C is additive later
+
+```json
+"action": "checkout"
+"action": { "name": "addToCart", "params": { "productId": "42", "qty": 1 } }
+```
+
+Both forms canonical. The string is defined *in the spec* as sugar for
+`{name: …, params: {}}` — which is not a repeat of the legacy-alias mistake, because the
+mistake there was that the alias existed only in one decoder and in no document anyone else
+could read.
+
+Four rulings that come with it:
+
+1. **`params` values are JSON scalars only** at v1.2 — string, number, boolean, null. No
+   nested objects or arrays. This keeps the Swift type to a four-case enum with no
+   dependency and makes binding trivial on every platform. It can be widened later; it
+   cannot be narrowed.
+2. **Dotted names are reserved.** `jun.*` is reserved for future spec-defined verbs;
+   unprefixed names are app-defined. Implementations MUST forward an unrecognised `jun.*`
+   action to the host rather than erroring. This is what makes C additive rather than
+   breaking — reserving the namespace now costs one sentence.
+3. **`action` stays button-only.** A universal `onTap` is a separate interaction-model
+   question (hit testing, nested tappables, accessibility traits) and buttons cover the case.
+4. **The handler is synchronous.** `(JUNAction) -> Void`; a host that needs to await
+   something spawns its own `Task`. Specifying an async result model before we know what the
+   UI does with the result is premature.
+
+### Why not C yet — the argument that actually decides it
+
+A and B are safe by construction: the document names an intent, and nothing happens unless
+the host app implements it. The moment the spec defines `jun.openURL` with mandated
+behaviour, a remote document gains the power to make the app act *without any app code*.
+That is a phishing surface, and every future implementation would have to get the host-veto
+story right independently. That is a real design job, not a schema addition — and the
+reserved namespace means deferring it costs nothing.
+
+### Swift shape
+
+```swift
+public struct JUNAction: Hashable, Sendable {
+    public let name: String
+    public let params: [String: JUNValue]
+}
+
+public enum JUNValue: Hashable, Sendable, Codable {
+    case string(String), number(Double), bool(Bool), null
+}
+
+// Injected through the environment, not per-view:
+ComponentRenderer(component: document.root)
+    .junActionHandler { action in
+        switch action.name {
+        case "addToCart": cart.add(action.params["productId"]?.stringValue)
+        default: break
+        }
+    }
+```
+
+Default handler: no-op, with an `OSLog` line in debug builds. Never an unconditional
+`print`, which is what ships today.
+
+---
+
+## Appendix B — Strictness (proposal)
+
+**Question:** lenient-with-diagnostics, or strict-by-default with an opt-out?
+
+### The framing is the answer
+
+"Strictness" conflates three separate axes — what happens to a bad node, whether anyone is
+told, and who chooses. Today the answer to all three is the same: drop it, tell nobody, no
+choice. Splitting them shows that the two classes of failure have *opposite* correct
+answers:
+
+| | Forward-compatibility failure | Malformed input |
+|---|---|---|
+| Example | Unknown component type; a v1.3 property arriving at a v1.2 client | `"fontSize": "20"`; missing required `content`; trailing comma |
+| Cause | The producer is ahead of the client | The producer has a bug |
+| Correct behaviour | **Degrade.** The spec mandates it — a client that throws here means the server can never ship a new component without a coordinated app release, which destroys the point of server-driven UI | **Be loud.** Silently dropping it means the bug ships and nobody ever learns |
+
+So the question is not which one to pick. It is: **lenient rendering, strict reporting,
+caller-chosen policy.**
+
+### Recommendation
+
+```swift
+public struct JUNDocument {
+    public let root: UIComponent
+    public let diagnostics: [JUNDiagnostic]   // always populated, never discarded
+}
+
+public struct JUNDiagnostic: Sendable {
+    public enum Severity { case error, warning }
+    public let severity: Severity
+    public let path: String      // "children[0].children[2].properties.fontSize"
+    public let message: String
+}
+
+public struct JUNParseOptions {
+    public var unknownComponents: UnknownPolicy = .skip     // .skip | .placeholder | .fail
+    public var invalidValues: InvalidPolicy   = .useDefault // .useDefault | .fail
+    public var maxDepth: Int  = 64
+    public var maxNodes: Int  = 10_000
+}
+```
+
+Five rulings:
+
+1. **`path` is the deliverable.** More than any policy knob, a JSON-pointer trail is what
+   turns "the screen is blank" into "`children[3].properties.imageURL` was not a string".
+   If only one thing from this appendix ships, ship this.
+2. **A malformed child must not take out its siblings.** Today `try?` on the whole
+   `[UIComponent]` array means one bad grandchild silently empties an entire container.
+   Decode children element-by-element; drop only the bad one; record a diagnostic. This is
+   the single highest-value change in the area.
+3. **Debug builds are loud for free.** Diagnostics at `.error` go to `OSLog` automatically,
+   so a developer sees them without opting in to anything.
+4. **Release builds hand diagnostics to the caller**, who can forward them to telemetry.
+   For server-driven UI this is the payoff: your *server* finds out its own documents are
+   broken, from the field, without anyone filing a bug.
+5. **Resource limits always throw.** Depth and node caps are protection against untrusted
+   input, not a style preference, so they are not part of the lenient path.
+
+Plus `JSONLoader.strict(_:) throws` — fails on the first `.error` — for use in tests and CI.
+
+### Two things this unlocks
+
+Combined with decision 5, CI gets a conformance check nearly free: run the strict loader
+over every canonical JUN example on every commit, and any divergence between the spec's
+documents and the reference implementation fails the build.
+
+And it changes the loader's return type from `UIComponent` to `JUNDocument`, which is a
+breaking change — free today, expensive after the first tag. Hence §5.1.
