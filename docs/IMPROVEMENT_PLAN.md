@@ -1,3 +1,20 @@
+> **Status, 2026-08-08.** Phases 0, 1, 2 and 4 are implemented and pushed to `main` on both
+> repositories, along with Appendix A (actions) and Appendix B (strictness) and the local-image
+> decision. See [CHANGELOG.md](../CHANGELOG.md) and the JUN repository's changelog for what
+> shipped. Two things remain outstanding:
+>
+> 1. **Neither repository is tagged.** Tag pushes were rejected by the environment this work ran
+>    in, so P0-1 — the blocker that makes the documented install fail — is still open. It needs
+>    one command per repository, run locally:
+>    `git tag -a v1.2.0 -m "…" && git push origin v1.2.0`.
+> 2. **Nothing was compiled.** No Swift toolchain was available, so the Swift changes are
+>    reviewed but unbuilt. CI will be the first real check.
+>
+> Phase 3 was deliberately partial. Everything that would have been a *breaking* change was
+> done before the first tag, where it is free; the purely additive items (image caching and
+> configurable placeholders, a public model and builder DSL, theming) were left for later,
+> where they cost nothing to add.
+
 # JUNSwiftUI + JUN — Analysis and Improvement Plan
 
 **Date:** 2026-08-08

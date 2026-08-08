@@ -28,9 +28,11 @@ workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
 echo "Fetching $JUN_REPO at $JUN_REF"
+resolved_ref="$JUN_REF"
 if ! git clone --quiet --depth 1 --branch "$JUN_REF" "$JUN_REPO" "$workdir/jun" 2>/dev/null; then
   echo "  ref '$JUN_REF' not found, falling back to the default branch"
   git clone --quiet --depth 1 "$JUN_REPO" "$workdir/jun"
+  resolved_ref="the default branch"
 fi
 
 staging="$workdir/staged"
@@ -51,10 +53,10 @@ fi
 
 if $check_only; then
   if diff --recursive --brief "$staging" "$destination"; then
-    echo "OK: $count example(s) match $JUN_REF"
+    echo "OK: $count example(s) match $resolved_ref"
     exit 0
   fi
-  echo "error: committed examples differ from $JUN_REPO@$JUN_REF" >&2
+  echo "error: committed examples differ from $JUN_REPO@$resolved_ref" >&2
   echo "       run ./Scripts/sync-examples.sh to update them" >&2
   exit 1
 fi
@@ -63,4 +65,4 @@ rm -rf "$destination"
 mkdir -p "$destination"
 cp "$staging"/*.json "$destination/"
 
-echo "Synced $count example(s) from $JUN_REF into ${destination#"$root"/}"
+echo "Synced $count example(s) from $resolved_ref into ${destination#"$root"/}"
